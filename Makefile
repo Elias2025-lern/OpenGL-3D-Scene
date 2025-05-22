@@ -1,48 +1,30 @@
-# Tên trình biên dịch C (sử dụng gcc của MINGW64)
+# Zielname der ausführbaren Datei
+TARGET = app
+
+# Verzeichnisse für Quellcode und Header-Dateien
+SRCDIR = src
+INCDIR = include
+
+# Compiler und Compiler-Optionen
 CC = gcc
+CFLAGS = -Wall -std=c11 -I$(INCDIR)  # Warnungen aktivieren, C11 Standard, Include-Verzeichnis hinzufügen
 
-# Cờ biên dịch (thêm -Wall để bật cảnh báo, -g để debug nếu cần)
-CFLAGS = -Wall -g -v
+# Linker-Optionen und Bibliotheken
+LDFLAGS = -lglew32 -lglfw3 -lopengl32 -lgdi32  # GLEW, GLFW und Windows OpenGL/GDI Bibliotheken linken
 
-# Bỏ biến INCLUDE_PATH vì GCC đã tự động tìm kiếm đường dẫn này
+# Alle C-Quelldateien im src-Verzeichnis finden
+SRC = $(wildcard $(SRCDIR)/*.c)
 
-# Cờ liên kết và các thư viện cần liên kết
-# Vì bạn đã cài đặt GLEW và GLFW bằng Pacman trong MINGW64,
-# trình biên dịch thường có thể tìm thấy header và lib mà không cần -I và -L
-# Các thư viện hệ thống Windows cần thiết cho OpenGL/GLFW
-LIBS = -lglfw3 -lglew32 -lopengl32 -lgdi32 -luser32 -lkernel32
-
-# Tên file thực thi (trên Windows là .exe)
-TARGET = buntesdreieck.exe
-
-# File nguồn C
-SRC = buntesdreieck.c
-
-# File đối tượng (kết quả sau khi biên dịch file nguồn)
-# Sử dụng thay thế hậu tố để chuyển .c thành .o
+# Objektdateien (nicht verwendet, aber definiert)
 OBJ = $(SRC:.c=.o)
 
-# Target mặc định: xây dựng file thực thi
-# Khi chạy 'make' mà không có đối số, target 'all' sẽ được thực thi
+# Standardziel: die ausführbare Datei bauen
 all: $(TARGET)
 
-# Quy tắc để liên kết các file đối tượng thành file thực thi
-# Phụ thuộc vào file đối tượng $(OBJ)
-# $^: tất cả các prerequisite (ở đây là buntesdreieck.o)
-# $@: target (ở đây là buntesdreieck.exe)
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS)
+# Bauen der ausführbaren Datei aus den Quelldateien
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Quy tắc để biên dịch file nguồn C (.c) thành file đối tượng (.o)
-# Đây là quy tắc chung (pattern rule) áp dụng cho bất kỳ file .c nào
-# Phụ thuộc vào file nguồn $< (file .c)
-# $@: target (file .o)
-# Không cần sử dụng $(INCLUDE_PATH) ở đây nữa
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Target 'clean' để xóa các file đã tạo ra trong quá trình build
-# Không phụ thuộc vào file nào cả
+# Aufräumen: ausführbare Datei löschen
 clean:
-	# Xóa file thực thi và các file đối tượng
-	rm -f $(TARGET) $(OBJ)
+	del /Q $(TARGET)
