@@ -1,54 +1,53 @@
-# Tên mục tiêu (executable)
-TARGET = app
-
-# Thư mục nguồn và header
-SRCDIR = src
-INCDIR = include
-
-# Thư mục chứa các tệp đối tượng trung gian
-BUILDDIR = build
-OBJDIR = $(BUILDDIR)/obj
-
-# Compiler và cờ biên dịch
 CC = gcc
-CFLAGS = -Wall -std=c11 -I$(INCDIR) -I/mingw64/include
 
-# Cờ linker và thư viện
-# Thư viện cho Windows (MinGW): GLEW, GLFW, OpenGL32, GDI32
-LDFLAGS = -lglew32 -lglfw3 -lopengl32 -lgdi32
+# Cờ biên dịch
+# -Wall: Bật tất cả cảnh báo
+# -g: Thêm thông tin debug
+# -v: Hiển thị chi tiết quá trình biên dịch (có thể bỏ đi nếu không cần)
+# -DGLEW_STATIC: RẤT QUAN TRỌNG cho việc liên kết GLEW tĩnh (glew32s.lib)
+# -Iinclude: Thêm thư mục 'include' vào đường dẫn tìm kiếm header files
+CFLAGS = -Wall -g -v -DGLEW_STATIC -Iinclude
 
-# Tìm tất cả các tệp .c trong thư mục nguồn
-SRC = $(wildcard $(SRCDIR)/*.c)
+# Thư viện cần liên kết (đã bao gồm các thư viện bạn cung cấp)
+# -lglfw3: Thư viện GLFW
+# -lglew32: Thư viện GLEW (thường là glew32s.lib cho static link)
+# -lopengl32: Thư viện OpenGL trên Windows
+# -lgdi32 -luser32 -lkernel32: Các thư viện hệ thống Windows cần thiết cho OpenGL/GLFW
+LIBS = -lglfw3 -lglew32 -lopengl32 -lgdi32 -luser32 -lkernel32
 
-# Chuyển đổi danh sách tệp .c thành danh sách tệp .o
-# Ví dụ: src/main.c -> build/obj/main.o
-OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
+# Tên file thực thi của dự án chúng ta
+TARGET = comgraph3d_app.exe
 
-# Mục tiêu mặc định: xây dựng ứng dụng
-all: $(TARGET)
+# Các file nguồn C của dự án
+SRC_DIR = src
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c
 
-# Tạo thư mục build và obj nếu chúng chưa tồn tại
-$(BUILDDIR):
-	mkdir -p $(BUILDDIR)
+# Thư mục chứa các file đối tượng (.o)
+OBJ_DIR = obj
+# Chuyển đổi các file .c trong SRCS thành các file .o trong OBJ_DIR
+OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
-$(OBJDIR): | $(BUILDDIR) # Đảm bảo BUILDDIR được tạo trước OBJDIR
-	mkdir -p $(OBJDIR)
+# Target mặc định: xây dựng file thực thi
+all: $(OBJ_DIR) $(TARGET)
 
-# Quy tắc chính để liên kết các tệp đối tượng thành tệp thực thi
-$(TARGET): $(OBJDIR) $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LDFLAGS)
+# Quy tắc để tạo thư mục OBJ_DIR nếu chưa tồn tại
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-# Quy tắc để biên dịch từng tệp .c thành tệp .o
-# Các tệp .o sẽ được đặt trong thư mục $(OBJDIR)
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(INCDIR)/obj_loader.h # Thêm obj_loader.h làm dependency
+# Quy tắc để liên kết các file đối tượng thành file thực thi
+# Phụ thuộc vào tất cả các file đối tượng trong $(OBJ)
+# $(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS): Lệnh biên dịch và liên kết
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS)
+
+# Quy tắc để biên dịch file nguồn C (.c) thành file đối tượng (.o)
+# Đây là quy tắc mẫu (pattern rule) áp dụng cho bất kỳ file .c nào
+# $<: Tên file nguồn (ví dụ: src/main.c)
+# $@: Tên file đối tượng đích (ví dụ: obj/main.o)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Mục tiêu dọn dẹp
+# Target 'clean' để xóa các file đã tạo ra trong quá trình build
 clean:
-	@echo "Cleaning up..."
-	@del /Q $(TARGET) 2>nul || true # Xóa TARGET, không báo lỗi nếu không tìm thấy
-	@rmdir /S /Q $(OBJDIR) 2>nul || true # Xóa thư mục OBJDIR và nội dung, không báo lỗi
-	@rmdir /S /Q $(BUILDDIR) 2>nul || true # Xóa thư mục BUILDDIR, không báo lỗi
-	@echo "Clean complete."
-
-.PHONY: all clean
+	rm -f $(TARGET) $(OBJ)
+	rmdir $(OBJ_DIR) 2> /dev/null || true # Xóa thư mục obj, bỏ qua lỗi nếu thư mục không rỗng
