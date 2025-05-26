@@ -1,7 +1,7 @@
 #include "matrix.h"
-#include <stdio.h>  // For printf
-#include <math.h>   // For sqrtf, sinf, cosf, tanf
-#include <string.h> // For memcpy
+#include <stdio.h>  // Für printf
+#include <math.h>   // Für sqrtf, sinf, cosf, tanf
+#include <string.h> // Für memcpy
 
 // --- Implementierung der Vektorfunktionen ---
 
@@ -58,10 +58,10 @@ vec3 vec3_normalize(vec3 v)
 {
     float len = vec3_length(v);
     if (len > 0.00001f)
-    { // Tránh chia cho 0 hoặc số rất nhỏ
+    { // Vermeide Division durch 0 oder sehr kleine Zahlen
         return vec3_scale(v, 1.0f / len);
     }
-    return vec3_create(0.0f, 0.0f, 0.0f); // Trả về vector 0 nếu độ dài bằng 0
+    return vec3_create(0.0f, 0.0f, 0.0f); // Gibt den Nullvektor zurück, wenn die Länge 0 ist
 }
 
 vec4 vec3_to_vec4(vec3 v, float w)
@@ -81,7 +81,7 @@ vec3 vec4_to_vec3(vec4 v)
 mat4 mat4_identity()
 {
     mat4 m;
-    memset(m.m, 0, sizeof(m.m)); // Đặt tất cả về 0
+    memset(m.m, 0, sizeof(m.m)); // Setzt alle Elemente auf 0
     m.m[0][0] = 1.0f;
     m.m[1][1] = 1.0f;
     m.m[2][2] = 1.0f;
@@ -93,13 +93,13 @@ mat4 mat4_multiply(mat4 a, mat4 b)
 {
     mat4 result = mat4_identity();
     for (int i = 0; i < 4; ++i)
-    { // Cột của ma trận kết quả
+    { // Spalten der Ergebnis-Matrix
         for (int j = 0; j < 4; ++j)
-        { // Hàng của ma trận kết quả
+        { // Zeilen der Ergebnis-Matrix
             result.m[i][j] = 0.0f;
             for (int k = 0; k < 4; ++k)
             {
-                // Lưu ý: a.m[i][k] và b.m[k][j] vì lưu trữ theo cột chính (column-major)
+                // Achtung: a.m[i][k] und b.m[k][j], da spaltenmajor gespeichert
                 result.m[i][j] += a.m[i][k] * b.m[k][j];
             }
         }
@@ -110,9 +110,9 @@ mat4 mat4_multiply(mat4 a, mat4 b)
 mat4 mat4_translate(mat4 m, vec3 v)
 {
     mat4 translation_matrix = mat4_identity();
-    translation_matrix.m[3][0] = v.x; // Vị trí x (cột 3, hàng 0)
-    translation_matrix.m[3][1] = v.y; // Vị trí y (cột 3, hàng 1)
-    translation_matrix.m[3][2] = v.z; // Vị trí z (cột 3, hàng 2)
+    translation_matrix.m[3][0] = v.x; // Position x (Spalte 3, Zeile 0)
+    translation_matrix.m[3][1] = v.y; // Position y (Spalte 3, Zeile 1)
+    translation_matrix.m[3][2] = v.z; // Position z (Spalte 3, Zeile 2)
     return mat4_multiply(m, translation_matrix);
 }
 
@@ -121,9 +121,9 @@ mat4 mat4_rotate(mat4 m, float angle_rad, vec3 axis)
     mat4 rotation_matrix = mat4_identity();
     float c = cosf(angle_rad);
     float s = sinf(angle_rad);
-    float omc = 1.0f - c; // One minus cosine
+    float omc = 1.0f - c; // Eins minus Kosinus
 
-    // Chuẩn hóa trục quay
+    // Achse normalisieren
     axis = vec3_normalize(axis);
     float x = axis.x;
     float y = axis.y;
@@ -155,9 +155,9 @@ mat4 mat4_scale(mat4 m, vec3 v)
 
 mat4 mat4_lookAt(vec3 eye, vec3 center, vec3 up)
 {
-    vec3 f = vec3_normalize(vec3_sub(center, eye)); // Forward vector
-    vec3 s = vec3_normalize(vec3_cross(f, up));     // Side vector
-    vec3 u = vec3_cross(s, f);                      // Up vector (recalculated to be orthogonal)
+    vec3 f = vec3_normalize(vec3_sub(center, eye)); // Vorwärtsvektor
+    vec3 s = vec3_normalize(vec3_cross(f, up));     // Seitlicher Vektor
+    vec3 u = vec3_cross(s, f);                      // Aufwärtsvektor (neu berechnet um orthogonal zu sein)
 
     mat4 result = mat4_identity();
     result.m[0][0] = s.x;
@@ -172,7 +172,8 @@ mat4 mat4_lookAt(vec3 eye, vec3 center, vec3 up)
 
     result.m[3][0] = -vec3_dot(s, eye);
     result.m[3][1] = -vec3_dot(u, eye);
-    result.m[3][2] = vec3_dot(f, eye); // F là vector từ eye -> center, nên dot product với eye sẽ là -(khoảng cách từ gốc tọa độ đến mặt phẳng vuông góc với f và đi qua eye)
+    result.m[3][2] = vec3_dot(f, eye);
+    // f ist der Vektor von eye zu center, deshalb ist das Skalarprodukt mit eye die negative Distanz von Ursprung bis zur Ebene orthogonal zu f und durch eye
 
     return result;
 }
@@ -185,9 +186,9 @@ mat4 mat4_perspective(float fov_rad, float aspect, float near_plane, float far_p
     result.m[0][0] = 1.0f / (aspect * tan_half_fov);
     result.m[1][1] = 1.0f / tan_half_fov;
     result.m[2][2] = -(far_plane + near_plane) / (far_plane - near_plane);
-    result.m[2][3] = -1.0f; // Để W = -Z (cho phép chia w)
+    result.m[2][3] = -1.0f; // Für W = -Z (ermöglicht Division durch w)
     result.m[3][2] = -(2.0f * far_plane * near_plane) / (far_plane - near_plane);
-    result.m[3][3] = 0.0f; // Đảm bảo W không bị ảnh hưởng bởi Z của đỉnh, mà lấy từ -Z của phép chiếu
+    result.m[3][3] = 0.0f; // Sicherstellen, dass W nicht vom Z-Wert der Ecke beeinflusst wird, sondern vom -Z der Projektion
 
     return result;
 }
@@ -206,9 +207,9 @@ void mat4_print(mat4 m)
 {
     printf("Matrix:\n");
     for (int j = 0; j < 4; ++j)
-    { // Hàng
+    { // Zeilen
         for (int i = 0; i < 4; ++i)
-        { // Cột
+        { // Spalten
             printf("%8.3f ", m.m[i][j]);
         }
         printf("\n");

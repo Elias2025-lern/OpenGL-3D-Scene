@@ -26,7 +26,7 @@ GLuint VAO, VBO;
 // Unser Shader-Objekt
 Shader basicColorShader;
 
-// --- Funktion zum Einrichten von OpenGL-Puffern (VAO, VBO) ---
+// --- Schritt 5: Funktion zum Einrichten von OpenGL-Puffern (VAO, VBO) ---
 bool setup_buffers()
 {
     glGenVertexArrays(1, &VAO);
@@ -62,7 +62,7 @@ int main()
 {
     GLFWwindow *window;
 
-    // 1. Initialisiere GLFW
+    // Schritt 1: Initialisiere GLFW
     // Registriere keinen Fehler-Callback für GLFW, wie gewünscht.
     if (!glfwInit())
     {
@@ -70,7 +70,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // 2. Konfiguriere GLFW und OpenGL-Kontext
+    // Schritt 2: Konfiguriere GLFW und OpenGL-Kontext
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -78,7 +78,7 @@ int main()
     // GLFW verwaltet die Fenstergröße automatisch.
     // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    // 3. Erstelle GLFW-Fenster - FÜR VOLL BILDSCHIRM GEÄNDERT
+    // Schritt 3: Erstelle GLFW-Fenster - FÜR VOLL BILDSCHIRM GEÄNDERT
     // Hole den Hauptmonitor (Primärbildschirm)
     GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
     if (!primaryMonitor)
@@ -110,7 +110,7 @@ int main()
 
     glfwMakeContextCurrent(window); // Setze den OpenGL-Kontext auf das Fenster
 
-    // 4. Initialisiere GLEW
+    // Schritt 4: Initialisiere GLEW
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -124,7 +124,7 @@ int main()
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
     printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    // 5. OpenGL-Puffer für das Dreieck einrichten
+    // Schritt 5: OpenGL-Puffer für das Dreieck einrichten
     if (!setup_buffers())
     {
         fprintf(stderr, "OpenGL-Puffer konnten nicht eingerichtet werden!\n");
@@ -133,7 +133,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // 6. Shader-Programm aus Dateien laden
+    // Schritt 6: Shader-Programm aus Dateien laden
     basicColorShader = shader_create("shaders/basic_color.vert", "shaders/basic_color.frag");
     if (basicColorShader.id == 0)
     { // Überprüfe, ob Shader-Erstellung erfolgreich war
@@ -146,7 +146,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // 7. Matrizen setzen (Neu)
+    // Schritt 7: Matrizen setzen (Neu)
     mat4 model_matrix = mat4_identity();      // Modellmatrix (Translation, Rotation, Skalierung des Objekts)
     mat4 view_matrix = mat4_identity();       // View-Matrix (Position der Kamera)
     mat4 projection_matrix = mat4_identity(); // Projektionsmatrix (Perspektive)
@@ -156,8 +156,8 @@ int main()
     // (OpenGL schaut standardmäßig in Richtung -Z)
     model_matrix = mat4_translate(model_matrix, vec3_create(0.0f, 0.0f, -2.0f));
 
-// Drehe das Dreieck etwas um die Y-Achse
-// 45 Grad in Radiant umrechnen: 45 * (M_PI / 180.0f)
+    // Drehe das Dreieck etwas um die Y-Achse
+    // 45 Grad in Radiant umrechnen: 45 * (M_PI / 180.0f)
 #define M_PI 3.14159265358979323846f // Definiere M_PI, falls noch nicht definiert
     model_matrix = mat4_rotate(model_matrix, 45.0f * (M_PI / 180.0f), vec3_create(0.0f, 1.0f, 0.0f));
 
@@ -174,7 +174,7 @@ int main()
     float aspect_ratio = (float)mode->width / (float)mode->height; // Aus Bildschirmgröße im Vollbildmodus
     projection_matrix = mat4_perspective(45.0f * (M_PI / 180.0f), aspect_ratio, 0.1f, 100.0f);
 
-    // 7. Haupt-Render-Schleife
+    // Schritt 8: Haupt-Render-Schleife
     // Schleife läuft, bis das Fenster geschlossen wird
     while (!glfwWindowShouldClose(window))
     {
@@ -188,7 +188,7 @@ int main()
         // Shader-Programm verwenden
         shader_use(&basicColorShader);
 
-        /* MATRIZEN BENUTZEN*/
+        /* MATRIZEN BENUTZEN */
         // Senden der Matrizen an den Shader
         // Hole die Position des Uniforms im Shader und übergebe die Matrix dorthin
         GLint modelLoc = glGetUniformLocation(basicColorShader.id, "model");
@@ -199,6 +199,7 @@ int main()
 
         GLint projLoc = glGetUniformLocation(basicColorShader.id, "projection");
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, (const GLfloat *)projection_matrix.m);
+
         // Vertex Array Object (VAO) binden, um OpenGL mitzuteilen, welche Daten verwendet werden
         glBindVertexArray(VAO);
         // Dreieck zeichnen mit 3 Vertices (Primitive Typ GL_TRIANGLES)
@@ -212,7 +213,7 @@ int main()
         glfwPollEvents();        // Verarbeite ausstehende Events (Tastatur, Maus, Fenstergröße)
     }
 
-    // 8. Ressourcen freigeben
+    // Schritt 9: Ressourcen freigeben
     fprintf(stdout, "Fenster schließen und aufräumen...\n");
     // OpenGL-Ressourcen freigeben
     glDeleteVertexArrays(1, &VAO);

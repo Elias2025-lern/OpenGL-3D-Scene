@@ -1,75 +1,75 @@
-#ifndef MATH_UTILS_H
-#define MATH_UTILS_H
+#ifndef MATRIX_H
+#define MATRIX_H
 
-// --- Định nghĩa Struct cho Vector 3D (vec3) ---
+// --- Definition der Struktur für einen 3D-Vektor (vec3) ---
 typedef struct
 {
     float x, y, z;
 } vec3;
 
-// --- Định nghĩa Struct cho Vector 4D (vec4) ---
+// --- Definition der Struktur für einen 4D-Vektor (vec4) ---
 typedef struct
 {
     float x, y, z, w;
 } vec4;
 
-// --- Định nghĩa Struct cho Ma trận 4x4 (mat4) ---
-// Lưu trữ theo cột chính (column-major) - chuẩn của OpenGL
-// m[col][row]
+// --- Definition der Struktur für eine 4x4-Matrix (mat4) ---
+// Speicherung in Spalten-Hauptordnung (column-major) - Standard bei OpenGL
+// m[Spalte][Zeile]
 typedef struct
 {
     float m[4][4];
 } mat4;
 
-// --- Khai báo các Hàm Toán học cho Vector ---
+// --- Deklaration der mathematischen Funktionen für Vektoren ---
 
-// Tạo một vec3 mới
+// Erzeugt einen neuen vec3
 vec3 vec3_create(float x, float y, float z);
-// Tạo một vec4 mới
+// Erzeugt einen neuen vec4
 vec4 vec4_create(float x, float y, float z, float w);
 
-// Cộng hai vec3
+// Addition von zwei vec3
 vec3 vec3_add(vec3 a, vec3 b);
-// Trừ hai vec3
+// Subtraktion von zwei vec3
 vec3 vec3_sub(vec3 a, vec3 b);
-// Nhân vec3 với một vô hướng
+// Skalierung eines vec3 mit einem Skalar
 vec3 vec3_scale(vec3 v, float s);
-// Nhân vô hướng (Dot Product) của hai vec3
+// Skalarprodukt (Dot-Produkt) von zwei vec3
 float vec3_dot(vec3 a, vec3 b);
-// Nhân vector (Cross Product) của hai vec3
+// Vektorprodukt (Cross-Produkt) von zwei vec3
 vec3 vec3_cross(vec3 a, vec3 b);
-// Chuẩn hóa vec3 (đưa về độ dài bằng 1)
+// Normalisierung eines vec3 (auf Länge 1 bringen)
 vec3 vec3_normalize(vec3 v);
-// Tính độ dài của vec3
+// Berechnung der Länge eines vec3
 float vec3_length(vec3 v);
 
-// Chuyển đổi vec3 sang vec4 (với w = 1.0f cho điểm, 0.0f cho vector hướng)
+// Umwandlung von vec3 zu vec4 (w = 1.0f für Punkt, 0.0f für Richtungsvektor)
 vec4 vec3_to_vec4(vec3 v, float w);
-// Chuyển đổi vec4 sang vec3
+// Umwandlung von vec4 zu vec3
 vec3 vec4_to_vec3(vec4 v);
 
-// --- Khai báo các Hàm Toán học cho Ma trận ---
+// --- Deklaration der mathematischen Funktionen für Matrizen ---
 
-// Tạo một ma trận đơn vị (identity matrix)
+// Erzeugt eine Einheitsmatrix (Identity Matrix)
 mat4 mat4_identity();
-// Nhân hai ma trận
+// Multiplikation von zwei Matrizen
 mat4 mat4_multiply(mat4 a, mat4 b);
-// Tạo ma trận tịnh tiến (Translation Matrix)
+// Erzeugt eine Translationsmatrix (Verschiebung)
 mat4 mat4_translate(mat4 m, vec3 v);
-// Tạo ma trận xoay (Rotation Matrix) quanh một trục (x, y, hoặc z)
+// Erzeugt eine Rotationsmatrix um eine Achse (x, y oder z)
 mat4 mat4_rotate(mat4 m, float angle_rad, vec3 axis);
-// Tạo ma trận tỉ lệ (Scaling Matrix)
+// Erzeugt eine Skalierungsmatrix
 mat4 mat4_scale(mat4 m, vec3 v);
 
-// Tạo ma trận nhìn (View Matrix) từ vị trí camera, điểm nhìn, và vector "up"
+// Erzeugt eine View-Matrix aus Kameraposition, Blickpunkt und Up-Vektor
 mat4 mat4_lookAt(vec3 eye, vec3 center, vec3 up);
-// Tạo ma trận chiếu phối cảnh (Perspective Projection Matrix)
+// Erzeugt eine perspektivische Projektionsmatrix
 mat4 mat4_perspective(float fov_rad, float aspect, float near_plane, float far_plane);
 
-// Áp dụng ma trận lên một vec4
+// Wendet eine Matrix auf einen vec4 an
 vec4 mat4_transform_vec4(mat4 m, vec4 v);
 
-// Hàm debug: In ma trận ra console
+// Debug-Funktion: Gibt die Matrix auf der Konsole aus
 void mat4_print(mat4 m);
 
-#endif // MATH_UTILS_H
+#endif
