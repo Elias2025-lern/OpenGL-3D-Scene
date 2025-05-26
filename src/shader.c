@@ -1,11 +1,11 @@
 #include "shader.h"
-#include <stdio.h>  // For fprintf
-#include <stdlib.h> // For free (for string read from file)
+#include <stdio.h>  // Für fprintf
+#include <stdlib.h> // Für free (für aus Datei gelesene Strings)
 
-// Helper function to compile a single shader (vertex or fragment)
+// Hilfsfunktion, um einen einzelnen Shader (Vertex oder Fragment) zu kompilieren
 static GLuint compile_single_shader(GLenum type, const char *source)
 {
-    assert(source != NULL && "Shader source cannot be NULL");
+    assert(source != NULL && "Shader-Quelle darf nicht NULL sein");
 
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, NULL);
@@ -17,7 +17,7 @@ static GLuint compile_single_shader(GLenum type, const char *source)
     if (!success)
     {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        fprintf(stderr, "Shader compilation error (%s): %s\n",
+        fprintf(stderr, "Shader-Kompilierungsfehler (%s): %s\n",
                 (type == GL_VERTEX_SHADER ? "Vertex" : "Fragment"), infoLog);
         glDeleteShader(shader);
         return 0;
@@ -25,44 +25,44 @@ static GLuint compile_single_shader(GLenum type, const char *source)
     return shader;
 }
 
-// Function to create a shader program from vertex and fragment shader files
+// Funktion, um ein Shader-Programm aus Vertex- und Fragment-Shader-Dateien zu erstellen
 Shader shader_create(const char *vertexPath, const char *fragmentPath)
 {
-    Shader s = {.id = 0}; // Initialize shader with ID 0
+    Shader s = {.id = 0}; // Initialisiere Shader mit ID 0
 
-    // 1. Read shader source code from files
+    // 1. Lese Shader-Quellcode aus Dateien
     char *vertexCode = read_file(vertexPath);
     char *fragmentCode = read_file(fragmentPath);
 
     if (vertexCode == NULL || fragmentCode == NULL)
     {
-        // Error messages are already printed by read_file
+        // Fehlermeldungen wurden bereits von read_file ausgegeben
         if (vertexCode)
             free(vertexCode);
         if (fragmentCode)
             free(fragmentCode);
-        return s; // Return invalid shader
+        return s; // Ungültigen Shader zurückgeben
     }
 
-    // 2. Compile shaders
+    // 2. Shader kompilieren
     GLuint vertexShader = compile_single_shader(GL_VERTEX_SHADER, vertexCode);
     GLuint fragmentShader = compile_single_shader(GL_FRAGMENT_SHADER, fragmentCode);
 
-    // Free memory allocated for shader source code after compilation
+    // Speicher für Shader-Quellcode nach der Kompilierung freigeben
     free(vertexCode);
     free(fragmentCode);
 
     if (vertexShader == 0 || fragmentShader == 0)
     {
-        // Error messages are already printed by compile_single_shader
+        // Fehlermeldungen wurden bereits von compile_single_shader ausgegeben
         if (vertexShader)
             glDeleteShader(vertexShader);
         if (fragmentShader)
             glDeleteShader(fragmentShader);
-        return s; // Return invalid shader
+        return s; // Ungültigen Shader zurückgeben
     }
 
-    // 3. Link shader program
+    // 3. Shader-Programm verlinken
     s.id = glCreateProgram();
     glAttachShader(s.id, vertexShader);
     glAttachShader(s.id, fragmentShader);
@@ -74,45 +74,45 @@ Shader shader_create(const char *vertexPath, const char *fragmentPath)
     if (!success)
     {
         glGetProgramInfoLog(s.id, 512, NULL, infoLog);
-        fprintf(stderr, "Shader program linking error: %s\n", infoLog);
+        fprintf(stderr, "Fehler beim Verlinken des Shader-Programms: %s\n", infoLog);
         glDeleteProgram(s.id);
-        s.id = 0; // Mark as invalid
+        s.id = 0; // Als ungültig markieren
     }
 
-    // Delete the individual shaders after they've been linked into the program
+    // Einzelne Shader löschen, nachdem sie in das Programm verlinkt wurden
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
     return s;
 }
 
-// Function to activate (use) the shader program
+// Funktion, um das Shader-Programm zu aktivieren (zu benutzen)
 void shader_use(Shader *shader)
 {
-    assert(shader != NULL && "Shader pointer cannot be NULL");
+    assert(shader != NULL && "Shader-Zeiger darf nicht NULL sein");
     glUseProgram(shader->id);
 }
 
-// Function to set a float uniform in the shader
+// Funktion, um eine float-Uniform im Shader zu setzen
 void shader_set_float(Shader *shader, const char *name, float value)
 {
-    assert(shader != NULL && "Shader pointer cannot be NULL");
-    assert(name != NULL && "Uniform name cannot be NULL");
+    assert(shader != NULL && "Shader-Zeiger darf nicht NULL sein");
+    assert(name != NULL && "Uniform-Name darf nicht NULL sein");
     glUniform1f(glGetUniformLocation(shader->id, name), value);
 }
 
-// Function to set an int uniform in the shader
+// Funktion, um eine int-Uniform im Shader zu setzen
 void shader_set_int(Shader *shader, const char *name, int value)
 {
-    assert(shader != NULL && "Shader pointer cannot be NULL");
-    assert(name != NULL && "Uniform name cannot be NULL");
+    assert(shader != NULL && "Shader-Zeiger darf nicht NULL sein");
+    assert(name != NULL && "Uniform-Name darf nicht NULL sein");
     glUniform1i(glGetUniformLocation(shader->id, name), value);
 }
 
-// Function to delete the shader program
+// Funktion, um das Shader-Programm zu löschen
 void shader_destroy(Shader *shader)
 {
-    assert(shader != NULL && "Shader pointer cannot be NULL");
+    assert(shader != NULL && "Shader-Zeiger darf nicht NULL sein");
     glDeleteProgram(shader->id);
-    shader->id = 0; // Mark as freed
+    shader->id = 0; // Als freigegeben markieren
 }
