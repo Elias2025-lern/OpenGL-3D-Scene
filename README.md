@@ -75,3 +75,4 @@ Befolge diese Schritte, um das Projekt zu klonen, zu bauen und die Anwendung zu 
 ## 👤 Autor
 
 - **Phu Quy Le**, Matrikelnummer: 1764640
+- **Mohammed Al-Muliki**, Martikelnummer: 1696172
