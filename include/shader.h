@@ -3,27 +3,27 @@
 
 #include <GL/glew.h>
 #include <stdbool.h>
-#include "utils.h" // To use read_file
+#include "utils.h" // Um read_file zu verwenden
 
-// Define Shader struct to encapsulate the shader program ID
+// Definiert die Shader-Struktur, die die ID des Shader-Programms kapselt
 typedef struct
 {
     GLuint id;
 } Shader;
 
-// Function to create a shader program from vertex and fragment shader files
+// Funktion zum Erstellen eines Shader-Programms aus Vertex- und Fragment-Shader-Dateien
 Shader shader_create(const char *vertexPath, const char *fragmentPath);
 
-// Function to activate (use) the shader program
+// Funktion zum Aktivieren (Benutzen) des Shader-Programms
 void shader_use(Shader *shader);
 
-// Function to set a float uniform in the shader
+// Funktion zum Setzen einer float-Uniform-Variable im Shader
 void shader_set_float(Shader *shader, const char *name, float value);
 
-// Function to set an int uniform in the shader
+// Funktion zum Setzen einer int-Uniform-Variable im Shader
 void shader_set_int(Shader *shader, const char *name, int value);
 
-// Function to delete the shader program
+// Funktion zum Löschen des Shader-Programms
 void shader_destroy(Shader *shader);
 
 #endif // SHADER_H

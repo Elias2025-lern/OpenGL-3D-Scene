@@ -1,53 +1,54 @@
 CC = gcc
 
-# Cờ biên dịch
-# -Wall: Bật tất cả cảnh báo
-# -g: Thêm thông tin debug
-# -v: Hiển thị chi tiết quá trình biên dịch (có thể bỏ đi nếu không cần)
-# -DGLEW_STATIC: RẤT QUAN TRỌNG cho việc liên kết GLEW tĩnh (glew32s.lib)
-# -Iinclude: Thêm thư mục 'include' vào đường dẫn tìm kiếm header files
+# Kompilierungsoptionen
+# -Wall: Alle Warnungen aktivieren
+# -g: Debug-Informationen hinzufügen
+# -v: Detaillierte Kompilierungsinformationen anzeigen (kann weggelassen werden, wenn nicht benötigt)
+# -DGLEW_STATIC: SEHR WICHTIG für statisches Linken von GLEW (glew32s.lib)
+# -Iinclude: Fügt den Ordner 'include' zum Suchpfad für Header-Dateien hinzu
 CFLAGS = -Wall -g -v -DGLEW_STATIC -Iinclude
 
-# Thư viện cần liên kết (đã bao gồm các thư viện bạn cung cấp)
-# -lglfw3: Thư viện GLFW
-# -lglew32: Thư viện GLEW (thường là glew32s.lib cho static link)
-# -lopengl32: Thư viện OpenGL trên Windows
-# -lgdi32 -luser32 -lkernel32: Các thư viện hệ thống Windows cần thiết cho OpenGL/GLFW
+# Bibliotheken für das Linken (inklusive der von dir bereitgestellten Bibliotheken)
+# -lglfw3: GLFW Bibliothek
+# -lglew32: GLEW Bibliothek (meist glew32s.lib für statisches Linken)
+# -lopengl32: OpenGL Bibliothek unter Windows
+# -lgdi32 -luser32 -lkernel32: Windows-Systembibliotheken notwendig für OpenGL/GLFW
 LIBS = -lglfw3 -lglew32 -lopengl32 -lgdi32 -luser32 -lkernel32
 
-# Tên file thực thi của dự án chúng ta
-TARGET = comgraph3d_app.exe
+# Name der ausführbaren Datei des Projekts
+TARGET = app.exe
 
-# Các file nguồn C của dự án
+# C-Quellcodedateien des Projekts
 SRC_DIR = src
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c $(SRC_DIR)/matrix.c
 
-# Thư mục chứa các file đối tượng (.o)
+# Ordner für Objektdateien (.o)
 OBJ_DIR = obj
-# Chuyển đổi các file .c trong SRCS thành các file .o trong OBJ_DIR
+# Ersetze die .c Dateien in SRCS durch entsprechende .o Dateien im OBJ_DIR
 OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
-# Target mặc định: xây dựng file thực thi
+# Standard-Target: Erstelle die ausführbare Datei
 all: $(OBJ_DIR) $(TARGET)
 
-# Quy tắc để tạo thư mục OBJ_DIR nếu chưa tồn tại
+# Regel, um den Ordner OBJ_DIR zu erstellen, falls er noch nicht existiert
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
-# Quy tắc để liên kết các file đối tượng thành file thực thi
-# Phụ thuộc vào tất cả các file đối tượng trong $(OBJ)
-# $(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS): Lệnh biên dịch và liên kết
+# Regel, um die Objektdateien zu einer ausführbaren Datei zu linken
+# Abhängig von allen Objektdateien in $(OBJ)
+# $(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS): Kompiliert und linked
 $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS)
 
-# Quy tắc để biên dịch file nguồn C (.c) thành file đối tượng (.o)
-# Đây là quy tắc mẫu (pattern rule) áp dụng cho bất kỳ file .c nào
-# $<: Tên file nguồn (ví dụ: src/main.c)
-# $@: Tên file đối tượng đích (ví dụ: obj/main.o)
+# Regel zum Kompilieren von C-Quellcodedateien (.c) zu Objektdateien (.o)
+# Dies ist eine Musterregel (pattern rule) für beliebige .c Dateien
+# $<: Quellcodedatei (z.B. src/main.c)
+# $@: Ziel-Objektdatei (z.B. obj/main.o)
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Target 'clean' để xóa các file đã tạo ra trong quá trình build
+# Clean-Target zum Löschen der erstellten Dateien während des Builds
 clean:
 	rm -f $(TARGET) $(OBJ)
-	rmdir $(OBJ_DIR) 2> /dev/null || true # Xóa thư mục obj, bỏ qua lỗi nếu thư mục không rỗng
+	rmdir $(OBJ_DIR) 2> /dev/null || true # Löscht den obj-Ordner, ignoriert Fehler wenn der Ordner nicht leer ist

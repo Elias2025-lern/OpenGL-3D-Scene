@@ -1,8 +1,8 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec3 vertexColor; // Input color, interpolated from vertex shader
+in vec3 vertexColor; // Eingabefarbe, vom Vertex-Shader interpoliert
 
 void main() {
-    FragColor = vec4(vertexColor, 1.0f); // Use the interpolated color as the final fragment color
+    FragColor = vec4(vertexColor, 1.0f); // Verwende die interpolierte Farbe als finale Fragmentfarbe
 }
