@@ -76,3 +76,4 @@ Befolge diese Schritte, um das Projekt zu klonen, zu bauen und die Anwendung zu 
 
 - **Phu Quy Le**, Matrikelnummer: 1764640
 - **Mohammed Al-Muliki**, Martikelnummer: 1696172
+- **Truong Minh Khoi Nguyen**, Matrikelnummer: 1764501
