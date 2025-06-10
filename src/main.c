@@ -74,41 +74,19 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // Für Vollbild wird GLFW_RESIZABLE nicht deaktiviert,
-    // GLFW verwaltet die Fenstergröße automatisch.
-    // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    // Fenster soll resizable sein (Standard, aber explizit setzen)
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-    // Schritt 3: Erstelle GLFW-Fenster - FÜR VOLL BILDSCHIRM GEÄNDERT
-    // Hole den Hauptmonitor (Primärbildschirm)
-    GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
-    if (!primaryMonitor)
-    {
-        fprintf(stderr, "Konnte Hauptmonitor nicht ermitteln!\n");
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    // Hole aktuellen Video-Modus des Hauptmonitors
-    const GLFWvidmode *mode = glfwGetVideoMode(primaryMonitor);
-    if (!mode)
-    {
-        fprintf(stderr, "Konnte Video-Modus des Hauptmonitors nicht ermitteln!\n");
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    // Erstelle Fenster im Vollbildmodus
-    // Fenstergröße entspricht der aktuellen Bildschirmauflösung
-    // Der vierte Parameter ist der Monitor, hier wird primaryMonitor für Vollbild übergeben
-    window = glfwCreateWindow(mode->width, mode->height, WINDOW_TITLE, primaryMonitor, NULL);
+    // Schritt 3: Erstelle GLFW-Fenster - FENSTERGRÖßE 800x600
+    window = glfwCreateWindow(800, 600, WINDOW_TITLE, NULL, NULL);
     if (!window)
     {
         fprintf(stderr, "Konnte GLFW-Fenster nicht erstellen\n");
-        glfwTerminate(); // Ressourcen freigeben
+        glfwTerminate();
         return EXIT_FAILURE;
     }
 
-    glfwMakeContextCurrent(window); // Setze den OpenGL-Kontext auf das Fenster
+    glfwMakeContextCurrent(window);
 
     // Schritt 4: Initialisiere GLEW
     GLenum err = glewInit();
@@ -163,7 +141,7 @@ int main()
 
     // Kamera einstellen (View-Matrix)
     // Kamera steht bei (0,0,3), schaut auf (0,0,0), "up"-Vektor ist (0,1,0)
-    view_matrix = mat4_lookAt(vec3_create(0.0f, 0.0f, 3.0f),  // eye (Kameraposition)
+    view_matrix = mat4_lookAt(vec3_create(0.0f, 0.3f, 3.0f),  // eye (Kameraposition)
                               vec3_create(0.0f, 0.0f, 0.0f),  // center (Blickpunkt)
                               vec3_create(0.0f, 1.0f, 0.0f)); // up (Aufwärtsrichtung der Kamera)
 
@@ -171,7 +149,9 @@ int main()
     // Sichtwinkel (FOV): 45 Grad (in Radiant umgerechnet)
     // Seitenverhältnis (Aspect Ratio): abhängig von Fenstergröße
     // Near Plane: 0.1f, Far Plane: 100.0f
-    float aspect_ratio = (float)mode->width / (float)mode->height; // Aus Bildschirmgröße im Vollbildmodus
+    int window_width, window_height;
+    glfwGetWindowSize(window, &window_width, &window_height);
+    float aspect_ratio = (float)window_width / (float)window_height;
     projection_matrix = mat4_perspective(45.0f * (M_PI / 180.0f), aspect_ratio, 0.1f, 100.0f);
 
     // Schritt 8: Haupt-Render-Schleife

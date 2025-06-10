@@ -29,6 +29,7 @@ vec3 vec3_sub(vec3 a, vec3 b)
     return v;
 }
 
+// Skalaprodukt
 vec3 vec3_scale(vec3 v, float s)
 {
     vec3 scaled_v = {v.x * s, v.y * s, v.z * s};
