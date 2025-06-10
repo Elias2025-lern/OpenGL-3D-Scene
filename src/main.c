@@ -1,61 +1,31 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <stdio.h>   // Für printf, fprintf
-#include <stdlib.h>  // Für exit()
-#include <stdbool.h> // Für bool
-
+#include <stdio.h>        // Für printf, fprintf
+#include <stdlib.h>       // Für exit()
+#include <stdbool.h>      // Für bool
+#define _USE_MATH_DEFINES // Muss vor dem Einbinden von math.h stehen
+#include <math.h>
 #include "utils.h"  // Enthält Hilfsfunktionen
 #include "shader.h" // Enthält Shader-Modul
 #include "matrix.h"
+#include "models.h"
+#include "object.h"
 
 const char *WINDOW_TITLE = "OpenGL";
-
-// --- Definiere Daten für ein Dreieck mit pro-Vertex Farben ---
-// Jeder Vertex hat: 3 Positionswerte (X, Y, Z) und 3 Farbwerte (R, G, B)
-// Layout: PosX, PosY, PosZ, FarbeR, FarbeG, FarbeB
-float vertices[] = {
-    // Position (X, Y, Z)  // Farbe (R, G, B)
-    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // Unten links (Rot)
-    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // Unten rechts (Grün)
-    0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // Oben Mitte (Blau)
-};
-
-// VAO und VBO für unser Dreieck
-GLuint VAO, VBO;
 
 // Unser Shader-Objekt
 Shader basicColorShader;
 
-// --- Schritt 5: Funktion zum Einrichten von OpenGL-Puffern (VAO, VBO) ---
-bool setup_buffers()
-{
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+RenderObject triangle_obj; // Objekt, das das Dreieck darstellt
+RenderObject sphere_obj;   // Objekt, das die Kugel darstellt
 
-    glBindVertexArray(VAO);
+// Variablen zur Speicherung der dynamisch erzeugten Kugeldaten (wichtig für spätere Freigabe)
+float *sphere_data_ptr = NULL;
+int sphere_num_floats = 0;
+int sphere_vertex_size = 0;
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Konfiguriere Vertex-Attribut (Position):
-    // layout (location = 0) im Shader ist für Position (aPos)
-    // 3 floats pro Position, nicht normalisiert
-    // stride ist 6 * sizeof(float), da jeder Vertex 6 floats hat (3 pos + 3 Farbe)
-    // Offset ist 0 (beginnt am Anfang der Vertex-Daten)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    // Konfiguriere Vertex-Attribut (Farbe):
-    // layout (location = 1) im Shader ist für Farbe (aColor)
-    // 3 floats pro Farbe, nicht normalisiert
-    // stride ist 6 * sizeof(float) (Gesamtgröße eines Vertex)
-    // Offset ist 3 * sizeof(float) (beginnt nach den 3 Positionsfloats)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0); // VAO entbinden, um versehentliche Änderungen zu vermeiden
-    return true;
-}
+// Callback-Funktion, die aufgerufen wird, wenn die Fenstergröße geändert wird
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 // --- Hauptprogramm ---
 int main()
@@ -63,7 +33,7 @@ int main()
     GLFWwindow *window;
 
     // Schritt 1: Initialisiere GLFW
-    // Registriere keinen Fehler-Callback für GLFW, wie gewünscht.
+    // Kein Fehler-Callback für GLFW registrieren, wie gewünscht.
     if (!glfwInit())
     {
         fprintf(stderr, "GLFW konnte nicht initialisiert werden\n");
@@ -74,7 +44,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // Fenster soll resizable sein (Standard, aber explizit setzen)
+    // Fenster soll vergrößerbar sein (Standard, aber explizit setzen)
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     // Schritt 3: Erstelle GLFW-Fenster - FENSTERGRÖßE 800x600
@@ -87,6 +57,7 @@ int main()
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Schritt 4: Initialisiere GLEW
     GLenum err = glewInit();
@@ -98,109 +69,128 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // OpenGL und GLSL Version ausgeben (zur Kontrolle)
+    // OpenGL- und GLSL-Version ausgeben (zur Kontrolle)
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
     printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-    // Schritt 5: OpenGL-Puffer für das Dreieck einrichten
-    if (!setup_buffers())
-    {
-        fprintf(stderr, "OpenGL-Puffer konnten nicht eingerichtet werden!\n");
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
 
     // Schritt 6: Shader-Programm aus Dateien laden
     basicColorShader = shader_create("shaders/basic_color.vert", "shaders/basic_color.frag");
     if (basicColorShader.id == 0)
-    { // Überprüfe, ob Shader-Erstellung erfolgreich war
+    {
         fprintf(stderr, "Shader-Programm konnte nicht erstellt werden!\n");
-        // Puffer vor Beenden aufräumen, falls Shader-Erstellung fehlschlägt
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
         glfwDestroyWindow(window);
         glfwTerminate();
         return EXIT_FAILURE;
     }
 
-    // Schritt 7: Matrizen setzen (Neu)
-    mat4 model_matrix = mat4_identity();      // Modellmatrix (Translation, Rotation, Skalierung des Objekts)
-    mat4 view_matrix = mat4_identity();       // View-Matrix (Position der Kamera)
-    mat4 projection_matrix = mat4_identity(); // Projektionsmatrix (Perspektive)
+    // 1. DREIECK ERSTELLEN
+    // object_create() aufrufen, um VAO/VBO für das Dreieck einzurichten
+    // Die Daten triangle_vertices sind in src/models.c definiert und in include/models.h deklariert
+    triangle_obj = object_create(triangle_vertices, num_triangle_triangle_floats, triangle_vertex_size);
+    if (triangle_obj.VAO == 0)
+    { // Prüfen, ob das Objekt erfolgreich erstellt wurde
+        fprintf(stderr, "Konnte Dreieck-Objekt nicht erstellen!\n");
+        // Bereits erstellte Ressourcen freigeben
+        shader_destroy(&basicColorShader);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
 
-    // Beispiel für Transformationen:
-    // Verschiebe das Dreieck etwas nach hinten, damit es nicht genau auf der Kamera liegt
-    // (OpenGL schaut standardmäßig in Richtung -Z)
-    model_matrix = mat4_translate(model_matrix, vec3_create(0.0f, 0.0f, -2.0f));
+    // Eigene Modelltransformation auf das Dreieck anwenden (verschieben und rotieren)
+    triangle_obj.model_matrix = mat4_identity();
+    triangle_obj.model_matrix = mat4_translate(triangle_obj.model_matrix, vec3_create(-0.75f, 0.0f, 0.0f));
+    triangle_obj.model_matrix = mat4_rotate(triangle_obj.model_matrix, 45.0f * (M_PI / 180.0f), vec3_create(0.0f, 1.0f, 0.0f));
 
-    // Drehe das Dreieck etwas um die Y-Achse
-    // 45 Grad in Radiant umrechnen: 45 * (M_PI / 180.0f)
-#define M_PI 3.14159265358979323846f // Definiere M_PI, falls noch nicht definiert
-    model_matrix = mat4_rotate(model_matrix, 45.0f * (M_PI / 180.0f), vec3_create(0.0f, 1.0f, 0.0f));
+    // 2. KUGEL ERSTELLEN
+    // Zuerst die Vertex-Daten für die Kugel generieren mit create_sphere_data()
+    // Parameter: Segmente (horizontale Auflösung), Ringe (vertikale Auflösung), sowie Zeiger zur Größenrückgabe
+    sphere_data_ptr = create_sphere_data(32, 16, &sphere_num_floats, &sphere_vertex_size);
+    if (sphere_data_ptr == NULL || sphere_num_floats == 0)
+    {
+        fprintf(stderr, "Konnte Kugeldaten nicht generieren!\n");
+        object_destroy(&triangle_obj); // Dreieck aufräumen, falls vorhanden
+        shader_destroy(&basicColorShader);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
 
-    // Kamera einstellen (View-Matrix)
-    // Kamera steht bei (0,0,3), schaut auf (0,0,0), "up"-Vektor ist (0,1,0)
-    view_matrix = mat4_lookAt(vec3_create(0.0f, 0.3f, 3.0f),  // eye (Kameraposition)
-                              vec3_create(0.0f, 0.0f, 0.0f),  // center (Blickpunkt)
-                              vec3_create(0.0f, 1.0f, 0.0f)); // up (Aufwärtsrichtung der Kamera)
+    // Dann RenderObject aus den generierten Kugeldaten erstellen
+    sphere_obj = object_create(sphere_data_ptr, sphere_num_floats, sphere_vertex_size);
+    if (sphere_obj.VAO == 0)
+    {
+        fprintf(stderr, "Konnte Kugel-Objekt nicht erstellen!\n");
+        free_sphere_data(sphere_data_ptr); // SEHR WICHTIG: Speicher der Kugeldaten freigeben
+        object_destroy(&triangle_obj);
+        shader_destroy(&basicColorShader);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
 
-    // Perspektive einstellen (Projektionsmatrix)
-    // Sichtwinkel (FOV): 45 Grad (in Radiant umgerechnet)
-    // Seitenverhältnis (Aspect Ratio): abhängig von Fenstergröße
-    // Near Plane: 0.1f, Far Plane: 100.0f
-    int window_width, window_height;
-    glfwGetWindowSize(window, &window_width, &window_height);
-    float aspect_ratio = (float)window_width / (float)window_height;
-    projection_matrix = mat4_perspective(45.0f * (M_PI / 180.0f), aspect_ratio, 0.1f, 100.0f);
+    // Eigene Modelltransformation auf die Kugel anwenden (verschieben und skalieren)
+    sphere_obj.model_matrix = mat4_identity();
+    sphere_obj.model_matrix = mat4_scale(sphere_obj.model_matrix, vec3_create(0.5f, 0.5f, 0.5f)); // Kugel verkleinern
 
     // Schritt 8: Haupt-Render-Schleife
     // Schleife läuft, bis das Fenster geschlossen wird
     while (!glfwWindowShouldClose(window))
     {
-        // Benutzer-Eingaben verarbeiten (z.B. ESC Taste), definiert in utils.c
+        // Benutzereingaben verarbeiten (z.B. ESC-Taste), definiert in utils.c
         processInput(window);
 
-        // --- Render Befehle ---
+        // Schritt 7: Matrizen setzen
+        // Kamera einrichten (View-Matrix)
+        // Kamera befindet sich bei (0,0,3), blickt auf (0,0,0), "up"-Vektor ist (0,1,0)
+        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 0.0f, 3.0f),
+                                       vec3_create(0.0f, 0.0f, 0.0f),
+                                       vec3_create(0.0f, 1.0f, 0.0f));
+
+        // Perspektivprojektion einrichten (Projection-Matrix)
+        // Blickwinkel (FOV): 45 Grad (in Radiant umgerechnet)
+        // Seitenverhältnis: abhängig von Fenstergröße
+        // Near Plane: 0.1f, Far Plane: 100.0f
+        int window_width, window_height;
+        glfwGetWindowSize(window, &window_width, &window_height);
+        float aspect_ratio = (float)window_width / (float)window_height;
+        mat4 projection_matrix = mat4_perspective(45.0f * (M_PI / 180.0f), aspect_ratio, 0.1f, 100.0f);
+
+        // --- Rendering-Befehle ---
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Hintergrundfarbe setzen (dunkles Petrol)
-        glClear(GL_COLOR_BUFFER_BIT);         // Nur den Farb-Puffer löschen (kein Tiefentest nötig für 2D-Dreieck)
+        glClear(GL_COLOR_BUFFER_BIT);         // Nur den Farb-Buffer löschen (kein Tiefentest nötig für 2D-Dreieck)
 
-        // Shader-Programm verwenden
-        shader_use(&basicColorShader);
+        // Anstatt glBindVertexArray() und glDrawArrays() direkt aufzurufen,
+        // verwenden wir object_draw() für jedes Objekt.
+        // Diese Funktion kümmert sich selbst um das Senden der model_matrix,
+        // das Binden des VAO und das Ausführen des Zeichnungsbefehls.
+        object_draw(&triangle_obj, &basicColorShader, &view_matrix, &projection_matrix);
+        object_draw(&sphere_obj, &basicColorShader, &view_matrix, &projection_matrix); // Kugel zeichnen
 
-        /* MATRIZEN BENUTZEN */
-        // Senden der Matrizen an den Shader
-        // Hole die Position des Uniforms im Shader und übergebe die Matrix dorthin
-        GLint modelLoc = glGetUniformLocation(basicColorShader.id, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (const GLfloat *)model_matrix.m);
-
-        GLint viewLoc = glGetUniformLocation(basicColorShader.id, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (const GLfloat *)view_matrix.m);
-
-        GLint projLoc = glGetUniformLocation(basicColorShader.id, "projection");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, (const GLfloat *)projection_matrix.m);
-
-        // Vertex Array Object (VAO) binden, um OpenGL mitzuteilen, welche Daten verwendet werden
-        glBindVertexArray(VAO);
-        // Dreieck zeichnen mit 3 Vertices (Primitive Typ GL_TRIANGLES)
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        // VAO entbinden, um unbeabsichtigte Änderungen zu vermeiden
-        glBindVertexArray(0);
-
-        // --- Render Befehle Ende ---
-
-        glfwSwapBuffers(window); // Tausche Vorder- und Hintergrund-Puffer, um Frame anzuzeigen
-        glfwPollEvents();        // Verarbeite ausstehende Events (Tastatur, Maus, Fenstergröße)
+        glfwSwapBuffers(window); // Front- und Backbuffer tauschen, um Frame anzuzeigen
+        glfwPollEvents();        // Ereignisse verarbeiten (Tastatur, Maus, Fenstergröße)
     }
 
     // Schritt 9: Ressourcen freigeben
     fprintf(stdout, "Fenster schließen und aufräumen...\n");
-    // OpenGL-Ressourcen freigeben
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    shader_destroy(&basicColorShader); // Shader-Programm freigeben
-    // GLFW-Ressourcen freigeben
+
+    // --- LETZTE ÄNDERUNG: Ressourcen der einzelnen Objekte freigeben ---
+    // object_destroy() für jedes erstellte RenderObject aufrufen
+    object_destroy(&triangle_obj);
+    object_destroy(&sphere_obj);
+
+    // WICHTIG: Speicher der dynamisch allozierten Kugeldaten freigeben
+    free_sphere_data(sphere_data_ptr);
+
+    // ... (Shader und GLFW freigeben - KEINE ÄNDERUNGEN) ...
+    shader_destroy(&basicColorShader);
     glfwDestroyWindow(window);
     glfwTerminate();
-    return 0; // Programm erfolgreich beenden
+    return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+    // Sicherstellen, dass der Viewport mit der neuen Fenstergröße übereinstimmt
+    glViewport(0, 0, width, height);
 }

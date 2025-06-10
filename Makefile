@@ -20,7 +20,8 @@ TARGET = app.exe
 
 # C-Quellcodedateien des Projekts
 SRC_DIR = src
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c $(SRC_DIR)/matrix.c
+# WICHTIG: Sicherstellen, dass alle .c-Dateien hier aufgeführt sind!
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c $(SRC_DIR)/matrix.c $(SRC_DIR)/models.c $(SRC_DIR)/object.c
 
 # Ordner für Objektdateien (.o)
 OBJ_DIR = obj
@@ -44,11 +45,10 @@ $(TARGET): $(OBJ)
 # Dies ist eine Musterregel (pattern rule) für beliebige .c Dateien
 # $<: Quellcodedatei (z.B. src/main.c)
 # $@: Ziel-Objektdatei (z.B. obj/main.o)
-
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean-Target zum Löschen der erstellten Dateien während des Builds
 clean:
 	rm -f $(TARGET) $(OBJ)
-	rmdir $(OBJ_DIR) 2> /dev/null || true # Löscht den obj-Ordner, ignoriert Fehler wenn der Ordner nicht leer ist
+	rmdir $(OBJ_DIR) 2> /dev/null || true # Löscht den obj-Ordner, ignoriert Fehler, wenn der Ordner nicht leer ist
