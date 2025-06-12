@@ -100,7 +100,7 @@ int main()
     // Eigene Modelltransformation auf das Dreieck anwenden (verschieben und rotieren)
     triangle_obj.model_matrix = mat4_identity();
     triangle_obj.model_matrix = mat4_translate(triangle_obj.model_matrix, vec3_create(-0.75f, 0.0f, 0.0f));
-    triangle_obj.model_matrix = mat4_rotate(triangle_obj.model_matrix, 45.0f * (M_PI / 180.0f), vec3_create(0.0f, 1.0f, 0.0f));
+    // triangle_obj.model_matrix = mat4_rotate(triangle_obj.model_matrix, 45.0f * (M_PI / 180.0f), vec3_create(0.0f, 1.0f, 0.0f));
 
     // 2. KUGEL ERSTELLEN
     // Zuerst die Vertex-Daten für die Kugel generieren mit create_sphere_data()
