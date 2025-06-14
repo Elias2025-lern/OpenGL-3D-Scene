@@ -73,6 +73,9 @@ int main()
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
     printf("GLSL Version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+    // Tiefentest aktivieren
+    glEnable(GL_DEPTH_TEST);
+
     // Schritt 6: Shader-Programm aus Dateien laden
     basicColorShader = shader_create("shaders/basic_color.vert", "shaders/basic_color.frag");
     if (basicColorShader.id == 0)
@@ -142,12 +145,13 @@ int main()
 
         // Schritt 7: Matrizen setzen
         // Kamera einrichten (View-Matrix)
-        // Kamera befindet sich bei (0,0,3), blickt auf (0,0,0), "up"-Vektor ist (0,1,0)
-        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 5.0f, 10.0f),
+        // Kamera befindet sich bei (0,1,5), blickt auf (0,0,0), "up"-Vektor ist (0,1,0)
+        vec3 camera_pos = vec3_create(0.0f, 0.0f, 5.0f); // Kameraposition etwas angepasst
+        mat4 view_matrix = mat4_lookAt(camera_pos,
                                        vec3_create(0.0f, 0.0f, 3.0f),
-                                       vec3_create(3.0f, 1.0f, 0.0f));
+                                       vec3_create(0.0f, 1.0f, 0.0f)); // Standard Up-Vektor
 
-        // Perspektivprojektion einrichten (Projection-Matrix)
+        // Perspektivprojektion einrichten (Projection-Matrix) - unverändert
         // Blickwinkel (FOV): 45 Grad (in Radiant umgerechnet)
         // Seitenverhältnis: abhängig von Fenstergröße
         // Near Plane: 0.1f, Far Plane: 100.0f
@@ -157,13 +161,25 @@ int main()
         mat4 projection_matrix = mat4_perspective(45.0f * (M_PI / 180.0f), aspect_ratio, 0.1f, 100.0f);
 
         // --- Rendering-Befehle ---
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Hintergrundfarbe setzen (dunkles Petrol)
-        glClear(GL_COLOR_BUFFER_BIT);         // Nur den Farb-Buffer löschen (kein Tiefentest nötig für 2D-Dreieck)
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);               // Hintergrundfarbe etwas dunkler
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Farb- und Tiefenbuffer löschen
+
+        // Shader aktivieren (wird auch in object_draw gemacht, aber hier für globale Uniforms)
+        shader_use(&basicColorShader);
+
+        // Licht-Uniforms setzen
+        // (Sie könnten shader_set_vec3 Funktionen in shader.c hinzufügen für bessere Lesbarkeit)
+        vec3 light_pos_world = vec3_create(1.2f, 2.0f, 3.0f);
+        glUniform3f(glGetUniformLocation(basicColorShader.id, "lightPos_world"), light_pos_world.x, light_pos_world.y, light_pos_world.z);
+        glUniform3f(glGetUniformLocation(basicColorShader.id, "viewPos_world"), camera_pos.x, camera_pos.y, camera_pos.z);
+        glUniform3f(glGetUniformLocation(basicColorShader.id, "lightColor"), 1.0f, 1.0f, 1.0f); // Weißes Licht
 
         // Anstatt glBindVertexArray() und glDrawArrays() direkt aufzurufen,
         // verwenden wir object_draw() für jedes Objekt.
         // Diese Funktion kümmert sich selbst um das Senden der model_matrix,
         // das Binden des VAO und das Ausführen des Zeichnungsbefehls.
+        // Der Shader sollte bereits aktiv sein und die globalen Licht-Uniforms gesetzt.
+
         object_draw(&triangle_obj, &basicColorShader, &view_matrix, &projection_matrix);
 
         object_draw(&sphere_obj, &basicColorShader, &view_matrix, &projection_matrix); // Kugel zeichnen

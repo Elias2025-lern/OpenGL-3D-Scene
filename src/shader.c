@@ -87,7 +87,7 @@ Shader shader_create(const char *vertexPath, const char *fragmentPath)
 }
 
 // Funktion, um das Shader-Programm zu aktivieren (zu benutzen)
-void shader_use(Shader *shader)
+void shader_use(const Shader *shader)
 {
     assert(shader != NULL && "Shader-Zeiger darf nicht NULL sein");
     glUseProgram(shader->id);
