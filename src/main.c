@@ -143,9 +143,9 @@ int main()
         // Schritt 7: Matrizen setzen
         // Kamera einrichten (View-Matrix)
         // Kamera befindet sich bei (0,0,3), blickt auf (0,0,0), "up"-Vektor ist (0,1,0)
-        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 0.0f, 3.0f),
-                                       vec3_create(0.0f, 0.0f, 0.0f),
-                                       vec3_create(0.0f, 1.0f, 0.0f));
+        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 5.0f, 10.0f),
+                                       vec3_create(0.0f, 0.0f, 3.0f),
+                                       vec3_create(3.0f, 1.0f, 0.0f));
 
         // Perspektivprojektion einrichten (Projection-Matrix)
         // Blickwinkel (FOV): 45 Grad (in Radiant umgerechnet)
@@ -165,6 +165,7 @@ int main()
         // Diese Funktion kümmert sich selbst um das Senden der model_matrix,
         // das Binden des VAO und das Ausführen des Zeichnungsbefehls.
         object_draw(&triangle_obj, &basicColorShader, &view_matrix, &projection_matrix);
+
         object_draw(&sphere_obj, &basicColorShader, &view_matrix, &projection_matrix); // Kugel zeichnen
 
         glfwSwapBuffers(window); // Front- und Backbuffer tauschen, um Frame anzuzeigen
