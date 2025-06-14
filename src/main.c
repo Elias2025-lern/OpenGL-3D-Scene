@@ -10,6 +10,7 @@
 #include "matrix.h"
 #include "models.h"
 #include "object.h"
+#define DEG2RAD(x) ((x) * (3.14159265f / 180.0f))
 
 const char *WINDOW_TITLE = "OpenGL";
 
@@ -125,6 +126,12 @@ int main()
     }
 
 
+    //Kamera initialisiert
+    vec3 camera_pos   = vec3_create(0.0f, 0.0f,  10.0f);
+    vec3 camera_front = vec3_create(0.0f, 0.0f, -1.0f);
+    vec3 camera_up    = vec3_create(0.0f, 1.0f,  0.0f);
+    
+
     // Schritt 8: Haupt-Render-Schleife
     // Schleife läuft, bis das Fenster geschlossen wird
     while (!glfwWindowShouldClose(window))
@@ -132,21 +139,36 @@ int main()
         // Benutzereingaben verarbeiten (z.B. ESC-Taste), definiert in utils.c
         processInput(window);
 
+        const float camera_speed = 0.05f;
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera_pos.z -= camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera_pos.z += camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera_pos.x -= camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera_pos.x += camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            camera_pos.y += camera_speed; 
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            camera_pos.y -= camera_speed;
+
+
         // Eigene Modelltransformation auf das Dreieck anwenden (verschieben und rotieren)
         float angle = (float)glfwGetTime();
         triangle_obj.model_matrix = mat4_identity();
         triangle_obj.model_matrix = mat4_rotate(triangle_obj.model_matrix, angle, vec3_create(0.0f, 1.0f, 0.0f));
         triangle_obj.model_matrix = mat4_translate(triangle_obj.model_matrix, vec3_create(-2.75f, 0.0f, 0.0f));
         
-        // Eigene Modelltransformation auf die Kugel anwenden (verschieben und skalieren)
+        // Eigene Modelltransformation auf die Kugel anwenden (verschieben und skalieren) a
         sphere_obj.model_matrix = mat4_identity();
         sphere_obj.model_matrix = mat4_scale(sphere_obj.model_matrix, vec3_create(1.5f, 1.5f, 1.5f)); // Kugel verkleinern
         sphere_obj.model_matrix = mat4_rotate(sphere_obj.model_matrix, angle, vec3_create(1.0f, 0.0f, 0.0f));
 
-        // Kamera befindet sich bei (0,0,7), blickt auf Center(0,0,0), "up"-Vektor ist (0,1,0)
-        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 0.0f, 7.0f),
-                                       vec3_create(0.0f, 0.0f, 0.0f),
-                                       vec3_create(0.0f, 1.0f, 0.0f));
+        mat4 view_matrix = mat4_lookAt(camera_pos,
+                               vec3_add(camera_pos, camera_front),
+                               camera_up);
 
         // Perspektivprojektion einrichten (Projection-Matrix)
         // Blickwinkel (FOV): 45 Grad (in Radiant umgerechnet)
