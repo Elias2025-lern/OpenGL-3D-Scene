@@ -97,11 +97,6 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // Eigene Modelltransformation auf das Dreieck anwenden (verschieben und rotieren)
-    triangle_obj.model_matrix = mat4_identity();
-    triangle_obj.model_matrix = mat4_translate(triangle_obj.model_matrix, vec3_create(-0.75f, 0.0f, 0.0f));
-    // triangle_obj.model_matrix = mat4_rotate(triangle_obj.model_matrix, 45.0f * (M_PI / 180.0f), vec3_create(0.0f, 1.0f, 0.0f));
-
     // 2. KUGEL ERSTELLEN
     // Zuerst die Vertex-Daten für die Kugel generieren mit create_sphere_data()
     // Parameter: Segmente (horizontale Auflösung), Ringe (vertikale Auflösung), sowie Zeiger zur Größenrückgabe
@@ -129,9 +124,6 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // Eigene Modelltransformation auf die Kugel anwenden (verschieben und skalieren)
-    sphere_obj.model_matrix = mat4_identity();
-    sphere_obj.model_matrix = mat4_scale(sphere_obj.model_matrix, vec3_create(0.5f, 0.5f, 0.5f)); // Kugel verkleinern
 
     // Schritt 8: Haupt-Render-Schleife
     // Schleife läuft, bis das Fenster geschlossen wird
@@ -140,12 +132,21 @@ int main()
         // Benutzereingaben verarbeiten (z.B. ESC-Taste), definiert in utils.c
         processInput(window);
 
-        // Schritt 7: Matrizen setzen
-        // Kamera einrichten (View-Matrix)
-        // Kamera befindet sich bei (0,0,3), blickt auf (0,0,0), "up"-Vektor ist (0,1,0)
-        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 5.0f, 10.0f),
-                                       vec3_create(0.0f, 0.0f, 3.0f),
-                                       vec3_create(3.0f, 1.0f, 0.0f));
+        // Eigene Modelltransformation auf das Dreieck anwenden (verschieben und rotieren)
+        float angle = (float)glfwGetTime();
+        triangle_obj.model_matrix = mat4_identity();
+        triangle_obj.model_matrix = mat4_rotate(triangle_obj.model_matrix, angle, vec3_create(0.0f, 1.0f, 0.0f));
+        triangle_obj.model_matrix = mat4_translate(triangle_obj.model_matrix, vec3_create(-2.75f, 0.0f, 0.0f));
+        
+        // Eigene Modelltransformation auf die Kugel anwenden (verschieben und skalieren)
+        sphere_obj.model_matrix = mat4_identity();
+        sphere_obj.model_matrix = mat4_scale(sphere_obj.model_matrix, vec3_create(1.5f, 1.5f, 1.5f)); // Kugel verkleinern
+        sphere_obj.model_matrix = mat4_rotate(sphere_obj.model_matrix, angle, vec3_create(1.0f, 0.0f, 0.0f));
+
+        // Kamera befindet sich bei (0,0,7), blickt auf Center(0,0,0), "up"-Vektor ist (0,1,0)
+        mat4 view_matrix = mat4_lookAt(vec3_create(0.0f, 0.0f, 7.0f),
+                                       vec3_create(0.0f, 0.0f, 0.0f),
+                                       vec3_create(0.0f, 1.0f, 0.0f));
 
         // Perspektivprojektion einrichten (Projection-Matrix)
         // Blickwinkel (FOV): 45 Grad (in Radiant umgerechnet)
@@ -159,7 +160,7 @@ int main()
         // --- Rendering-Befehle ---
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Hintergrundfarbe setzen (dunkles Petrol)
         glClear(GL_COLOR_BUFFER_BIT);         // Nur den Farb-Buffer löschen (kein Tiefentest nötig für 2D-Dreieck)
-
+        
         // Anstatt glBindVertexArray() und glDrawArrays() direkt aufzurufen,
         // verwenden wir object_draw() für jedes Objekt.
         // Diese Funktion kümmert sich selbst um das Senden der model_matrix,
