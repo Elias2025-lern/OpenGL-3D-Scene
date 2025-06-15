@@ -79,13 +79,19 @@ vec3 vec4_to_vec3(vec4 v)
 
 // --- Implementierung der Matrizenfunktionen ---
 
-mat4 mat4_identity() {
+mat4 mat4_identity()
+{
     mat4 out;
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 16; j++) {
-            if (i == j) { 
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if (i == j)
+            {
                 out.m[i][j] = 1.0f;
-            }else {
+            }
+            else
+            {
                 out.m[i][j] = 0.0f;
             }
         }
@@ -93,13 +99,16 @@ mat4 mat4_identity() {
     return out;
 }
 
-
-mat4 mat4_multiply(mat4 a, mat4 b) {
+mat4 mat4_multiply(mat4 a, mat4 b)
+{
     mat4 result = mat4_identity();
-    for (int i = 0; i < 4; ++i) { // Spalten der Ergebnis-Matrix
-        for (int j = 0; j < 4; ++j) { // Zeilen der Ergebnis-Matrix
+    for (int i = 0; i < 4; ++i)
+    { // Spalten der Ergebnis-Matrix
+        for (int j = 0; j < 4; ++j)
+        { // Zeilen der Ergebnis-Matrix
             result.m[i][j] = 0.0f;
-            for (int k = 0; k < 4; ++k) {// Achtung: a.m[i][k] und b.m[k][j], da spaltenmajor gespeichert
+            for (int k = 0; k < 4; ++k)
+            { // Achtung: a.m[i][k] und b.m[k][j], da spaltenmajor gespeichert
                 result.m[i][j] += a.m[i][k] * b.m[k][j];
             }
         }
@@ -107,7 +116,8 @@ mat4 mat4_multiply(mat4 a, mat4 b) {
     return result;
 }
 
-mat4 mat4_translate(mat4 m, vec3 v) {
+mat4 mat4_translate(mat4 m, vec3 v)
+{
     mat4 translation_matrix = mat4_identity();
     translation_matrix.m[3][0] = v.x; // Position x (Spalte 3, Zeile 0)
     translation_matrix.m[3][1] = v.y; // Position y (Spalte 3, Zeile 1)
@@ -115,7 +125,8 @@ mat4 mat4_translate(mat4 m, vec3 v) {
     return mat4_multiply(m, translation_matrix);
 }
 
-mat4 mat4_rotate(mat4 m, float angle_rad, vec3 axis) {
+mat4 mat4_rotate(mat4 m, float angle_rad, vec3 axis)
+{
     mat4 rotation_matrix = mat4_identity();
     float c = cosf(angle_rad);
     float s = sinf(angle_rad);
@@ -142,7 +153,8 @@ mat4 mat4_rotate(mat4 m, float angle_rad, vec3 axis) {
     return mat4_multiply(m, rotation_matrix);
 }
 
-mat4 mat4_scale(mat4 m, vec3 v) {
+mat4 mat4_scale(mat4 m, vec3 v)
+{
     mat4 scale_matrix = mat4_identity();
     scale_matrix.m[0][0] = v.x;
     scale_matrix.m[1][1] = v.y;
@@ -150,7 +162,8 @@ mat4 mat4_scale(mat4 m, vec3 v) {
     return mat4_multiply(m, scale_matrix);
 }
 
-mat4 mat4_lookAt(vec3 eye, vec3 center, vec3 up) {
+mat4 mat4_lookAt(vec3 eye, vec3 center, vec3 up)
+{
     vec3 f = vec3_normalize(vec3_sub(center, eye)); // Vorwärtsvektor
     vec3 s = vec3_normalize(vec3_cross(f, up));     // Seitlicher Vektor
     vec3 u = vec3_cross(s, f);                      // Aufwärtsvektor (neu berechnet um orthogonal zu sein)
@@ -174,7 +187,8 @@ mat4 mat4_lookAt(vec3 eye, vec3 center, vec3 up) {
     return result;
 }
 
-mat4 mat4_perspective(float fov_rad, float aspect, float near_plane, float far_plane) {
+mat4 mat4_perspective(float fov_rad, float aspect, float near_plane, float far_plane)
+{
     mat4 result = mat4_identity();
     float tan_half_fov = tanf(fov_rad / 2.0f);
 
@@ -188,7 +202,8 @@ mat4 mat4_perspective(float fov_rad, float aspect, float near_plane, float far_p
     return result;
 }
 
-vec4 mat4_transform_vec4(mat4 m, vec4 v) {
+vec4 mat4_transform_vec4(mat4 m, vec4 v)
+{
     vec4 result;
     result.x = m.m[0][0] * v.x + m.m[1][0] * v.y + m.m[2][0] * v.z + m.m[3][0] * v.w;
     result.y = m.m[0][1] * v.x + m.m[1][1] * v.y + m.m[2][1] * v.z + m.m[3][1] * v.w;
@@ -197,7 +212,8 @@ vec4 mat4_transform_vec4(mat4 m, vec4 v) {
     return result;
 }
 
-void mat4_print(mat4 m) {
+void mat4_print(mat4 m)
+{
     printf("Matrix:\n");
     for (int j = 0; j < 4; ++j)
     { // Zeilen
