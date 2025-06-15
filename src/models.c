@@ -6,13 +6,13 @@
 
 // Dreiecks-Daten
 float triangle_vertices[] = {
-    // Position          // Farbe (Rot, Grün, Blau)
-    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // Unten links (Rot)
-    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // Unten rechts (Grün)
-    0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // Oben Mitte (Blau)
+    // Position          // Farbe (R,G,B)   // Normalen (Nx,Ny,Nz)
+    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Unten links (Rot)
+    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // Unten rechts (Grün)
+    0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f    // Oben Mitte (Blau)
 };
 int num_triangle_triangle_floats = sizeof(triangle_vertices) / sizeof(float);
-int triangle_vertex_size = 6; // 3 für Position, 3 für Farbe
+int triangle_vertex_size = 9; // 3 Position, 3 Farbe, 3 Normal
 
 // Funktion zur Erstellung der Scheibendaten für eine Kugel
 // segments: Anzahl der horizontalen Segmente (von Pol zu Pol)
@@ -21,8 +21,8 @@ int triangle_vertex_size = 6; // 3 für Position, 3 für Farbe
 // out_vertex_size: Zeiger zur Rückgabe der Anzahl der float-Werte pro Vertex (3 pos + 3 Farbe = 6)
 float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out_vertex_size)
 {
-    // Jeder Vertex hat 6 floats (posX, posY, posZ, colorR, colorG, colorB)
-    *out_vertex_size = 6;
+    // Jeder Vertex hat 9 floats (posX, posY, posZ, colorR, colorG, colorB, normX, normY, normZ)
+    *out_vertex_size = 9;
 
     // Anzahl der Dreiecke = (segments * 2) * rings (jeder Ring hat 2*segments Dreiecke)
     // Oder genauer: 2 * segments (für die zwei Pole) + segments * (rings - 1) * 2 (für den Mittelteil)
@@ -56,12 +56,16 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
     {
         // Oberstes Dreieck (Top Cap)
         // Mittelpunkt oben (Nordpol)
-        sphere_data[current_float_index++] = 0.0f;
-        sphere_data[current_float_index++] = 1.0f;
-        sphere_data[current_float_index++] = 0.0f;
+        float p_top_x = 0.0f, p_top_y = 1.0f, p_top_z = 0.0f;
+        sphere_data[current_float_index++] = p_top_x;
+        sphere_data[current_float_index++] = p_top_y;
+        sphere_data[current_float_index++] = p_top_z;
         sphere_data[current_float_index++] = r_color;
         sphere_data[current_float_index++] = g_color;
         sphere_data[current_float_index++] = b_color;
+        sphere_data[current_float_index++] = 0.0f; // Normal.x for Nordpol
+        sphere_data[current_float_index++] = 1.0f; // Normal.y for Nordpol
+        sphere_data[current_float_index++] = 0.0f; // Normal.z for Nordpol
 
         // Punkt am ersten Ring (Top Ring)
         float theta1 = (float)i / segments * 2.0f * M_PI;
@@ -74,6 +78,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
         sphere_data[current_float_index++] = r_color;
         sphere_data[current_float_index++] = g_color;
         sphere_data[current_float_index++] = b_color;
+        sphere_data[current_float_index++] = x1; // Normal.x
+        sphere_data[current_float_index++] = y1; // Normal.y
+        sphere_data[current_float_index++] = z1; // Normal.z
 
         float theta2 = (float)(i + 1) / segments * 2.0f * M_PI;
         float x2 = cos(theta2) * sin(M_PI / rings);
@@ -85,6 +92,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
         sphere_data[current_float_index++] = r_color;
         sphere_data[current_float_index++] = g_color;
         sphere_data[current_float_index++] = b_color;
+        sphere_data[current_float_index++] = x2; // Normal.x
+        sphere_data[current_float_index++] = y2; // Normal.y
+        sphere_data[current_float_index++] = z2; // Normal.z
     }
 
     // Erstelle die Mittelstreifen
@@ -122,6 +132,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
             sphere_data[current_float_index++] = r_color;
             sphere_data[current_float_index++] = g_color;
             sphere_data[current_float_index++] = b_color;
+            sphere_data[current_float_index++] = x_top_left;
+            sphere_data[current_float_index++] = y_top_left;
+            sphere_data[current_float_index++] = z_top_left; // Normal.z
 
             sphere_data[current_float_index++] = x_bottom_left;
             sphere_data[current_float_index++] = y_bottom_left;
@@ -129,6 +142,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
             sphere_data[current_float_index++] = r_color;
             sphere_data[current_float_index++] = g_color;
             sphere_data[current_float_index++] = b_color;
+            sphere_data[current_float_index++] = x_bottom_left;
+            sphere_data[current_float_index++] = y_bottom_left;
+            sphere_data[current_float_index++] = z_bottom_left; // Normal.z
 
             sphere_data[current_float_index++] = x_top_right;
             sphere_data[current_float_index++] = y_top_right;
@@ -136,6 +152,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
             sphere_data[current_float_index++] = r_color;
             sphere_data[current_float_index++] = g_color;
             sphere_data[current_float_index++] = b_color;
+            sphere_data[current_float_index++] = x_top_right;
+            sphere_data[current_float_index++] = y_top_right;
+            sphere_data[current_float_index++] = z_top_right; // Normal.z
 
             // Dreieck 2
             sphere_data[current_float_index++] = x_top_right;
@@ -144,6 +163,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
             sphere_data[current_float_index++] = r_color;
             sphere_data[current_float_index++] = g_color;
             sphere_data[current_float_index++] = b_color;
+            sphere_data[current_float_index++] = x_top_right;
+            sphere_data[current_float_index++] = y_top_right;
+            sphere_data[current_float_index++] = z_top_right; // Normal.z
 
             sphere_data[current_float_index++] = x_bottom_left;
             sphere_data[current_float_index++] = y_bottom_left;
@@ -151,6 +173,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
             sphere_data[current_float_index++] = r_color;
             sphere_data[current_float_index++] = g_color;
             sphere_data[current_float_index++] = b_color;
+            sphere_data[current_float_index++] = x_bottom_left;
+            sphere_data[current_float_index++] = y_bottom_left;
+            sphere_data[current_float_index++] = z_bottom_left; // Normal.z
 
             sphere_data[current_float_index++] = x_bottom_right;
             sphere_data[current_float_index++] = y_bottom_right;
@@ -158,6 +183,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
             sphere_data[current_float_index++] = r_color;
             sphere_data[current_float_index++] = g_color;
             sphere_data[current_float_index++] = b_color;
+            sphere_data[current_float_index++] = x_bottom_right;
+            sphere_data[current_float_index++] = y_bottom_right;
+            sphere_data[current_float_index++] = z_bottom_right; // Normal.z
         }
     }
 
@@ -165,12 +193,17 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
     for (int i = 0; i < segments; ++i)
     {
         // Mittelpunkt unten (Südpol)
-        sphere_data[current_float_index++] = 0.0f;
-        sphere_data[current_float_index++] = -1.0f;
-        sphere_data[current_float_index++] = 0.0f;
+        float p_bot_x = 0.0f, p_bot_y = -1.0f, p_bot_z = 0.0f;
+        sphere_data[current_float_index++] = p_bot_x;
+        sphere_data[current_float_index++] = p_bot_y;
+        sphere_data[current_float_index++] = p_bot_z;
         sphere_data[current_float_index++] = r_color;
         sphere_data[current_float_index++] = g_color;
         sphere_data[current_float_index++] = b_color;
+        // Normal für Südpol
+        sphere_data[current_float_index++] = 0.0f;  // Normal.x
+        sphere_data[current_float_index++] = -1.0f; // Normal.y
+        sphere_data[current_float_index++] = 0.0f;  // Normal.z
 
         // Punkt am letzten Ring (Bottom Ring)
         float theta1 = (float)(i + 1) / segments * 2.0f * M_PI;
@@ -183,6 +216,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
         sphere_data[current_float_index++] = r_color;
         sphere_data[current_float_index++] = g_color;
         sphere_data[current_float_index++] = b_color;
+        sphere_data[current_float_index++] = x1; // Normal.x
+        sphere_data[current_float_index++] = y1; // Normal.y
+        sphere_data[current_float_index++] = z1; // Normal.z
 
         float theta2 = (float)i / segments * 2.0f * M_PI;
         float x2 = cos(theta2) * sin(M_PI - (M_PI / rings));
@@ -194,6 +230,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
         sphere_data[current_float_index++] = r_color;
         sphere_data[current_float_index++] = g_color;
         sphere_data[current_float_index++] = b_color;
+        sphere_data[current_float_index++] = x2; // Normal.x
+        sphere_data[current_float_index++] = y2; // Normal.y
+        sphere_data[current_float_index++] = z2; // Normal.z
     }
 
     // Sicherstellen, dass die Anzahl der geschriebenen floats mit der berechneten übereinstimmt

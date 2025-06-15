@@ -1,0 +1,4 @@
+app.exe
+obj/*.o
+app.exe
+obj/*.o

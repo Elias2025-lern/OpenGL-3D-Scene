@@ -28,14 +28,20 @@ RenderObject object_create(const float *vertices, int num_floats, int vertex_siz
     glBindBuffer(GL_ARRAY_BUFFER, new_obj.VBO);
     glBufferData(GL_ARRAY_BUFFER, num_floats * sizeof(float), vertices, GL_STATIC_DRAW);
 
-    // Konfiguration der Vertex-Attribute (angenommen vertex_size ist 6: 3 Position + 3 Farbe)
+    // Konfiguration der Vertex-Attribute
+    // vertex_size jetzt typischerweise 9 (3 Position + 3 Farbe + 3 Normal)
+    size_t stride = vertex_size * sizeof(float);
+
     // layout (location = 0) im Shader ist für Position (aPos)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
     glEnableVertexAttribArray(0);
 
     // layout (location = 1) im Shader ist für Farbe (aColor)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // layout (location = 2) im Shader ist für Normale (aNormal)
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0); // VAO lösen (unbind)
     return new_obj;
