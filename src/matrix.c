@@ -29,7 +29,7 @@ vec3 vec3_sub(vec3 a, vec3 b)
     return v;
 }
 
-// Skalaprodukt
+// Skalarprodukt
 vec3 vec3_scale(vec3 v, float s)
 {
     vec3 scaled_v = {v.x * s, v.y * s, v.z * s};
@@ -40,7 +40,7 @@ float vec3_dot(vec3 a, vec3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
-
+//Kreuzprodukt
 vec3 vec3_cross(vec3 a, vec3 b)
 {
     vec3 v = {
@@ -65,17 +65,6 @@ vec3 vec3_normalize(vec3 v)
     return vec3_create(0.0f, 0.0f, 0.0f); // Gibt den Nullvektor zurück, wenn die Länge 0 ist
 }
 
-vec4 vec3_to_vec4(vec3 v, float w)
-{
-    vec4 new_v = {v.x, v.y, v.z, w};
-    return new_v;
-}
-
-vec3 vec4_to_vec3(vec4 v)
-{
-    vec3 new_v = {v.x, v.y, v.z};
-    return new_v;
-}
 
 // --- Implementierung der Matrizenfunktionen ---
 
