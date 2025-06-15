@@ -17,13 +17,19 @@ const char *WINDOW_TITLE = "OpenGL";
 // Unser Shader-Objekt
 Shader basicColorShader;
 
-RenderObject triangle_obj; // Objekt, das das Dreieck darstellt
-RenderObject sphere_obj;   // Objekt, das die Kugel darstellt
+RenderObject triangle_obj;    // Objekt, das das Dreieck darstellt
+RenderObject sphere_obj;      // Objekt, das die Kugel darstellt
+RenderObject blue_sphere_obj; // Objekt für die blaue Kugel
 
 // Variablen zur Speicherung der dynamisch erzeugten Kugeldaten (wichtig für spätere Freigabe)
 float *sphere_data_ptr = NULL;
 int sphere_num_floats = 0;
 int sphere_vertex_size = 0;
+
+// Variablen für die blaue Kugel
+float *blue_sphere_data_ptr = NULL;
+int blue_sphere_num_floats = 0;
+int blue_sphere_vertex_size = 0;
 
 // Callback-Funktion, die aufgerufen wird, wenn die Fenstergröße geändert wird
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -104,7 +110,7 @@ int main()
     // 2. KUGEL ERSTELLEN
     // Zuerst die Vertex-Daten für die Kugel generieren mit create_sphere_data()
     // Parameter: Segmente (horizontale Auflösung), Ringe (vertikale Auflösung), sowie Zeiger zur Größenrückgabe
-    sphere_data_ptr = create_sphere_data(32, 16, &sphere_num_floats, &sphere_vertex_size);
+    sphere_data_ptr = create_sphere_data(1.0f, 1.0f, 0.0f, 32, 16, &sphere_num_floats, &sphere_vertex_size); // Ví dụ: màu vàng (R=1, G=1, B=0)
     if (sphere_data_ptr == NULL || sphere_num_floats == 0)
     {
         fprintf(stderr, "Konnte Kugeldaten nicht generieren!\n");
@@ -122,6 +128,33 @@ int main()
         fprintf(stderr, "Konnte Kugel-Objekt nicht erstellen!\n");
         free_sphere_data(sphere_data_ptr); // SEHR WICHTIG: Speicher der Kugeldaten freigeben
         object_destroy(&triangle_obj);
+        shader_destroy(&basicColorShader);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
+
+    // 3. BLAUE KUGEL ERSTELLEN (kleiner und um die gelbe Kugel kreisend)
+    blue_sphere_data_ptr = create_sphere_data(0.0f, 0.0f, 1.0f, 24, 12, &blue_sphere_num_floats, &blue_sphere_vertex_size); // Blaue Farbe
+    if (blue_sphere_data_ptr == NULL || blue_sphere_num_floats == 0)
+    {
+        fprintf(stderr, "Konnte Daten für blaue Kugel nicht generieren!\n");
+        free_sphere_data(sphere_data_ptr);
+        object_destroy(&triangle_obj);
+        object_destroy(&sphere_obj);
+        shader_destroy(&basicColorShader);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
+    blue_sphere_obj = object_create(blue_sphere_data_ptr, blue_sphere_num_floats, blue_sphere_vertex_size);
+    if (blue_sphere_obj.VAO == 0)
+    {
+        fprintf(stderr, "Konnte blaue Kugel-Objekt nicht erstellen!\n");
+        free_sphere_data(sphere_data_ptr);
+        free_sphere_data(blue_sphere_data_ptr);
+        object_destroy(&triangle_obj);
+        object_destroy(&sphere_obj);
         shader_destroy(&basicColorShader);
         glfwDestroyWindow(window);
         glfwTerminate();
@@ -166,6 +199,17 @@ int main()
         sphere_obj.model_matrix = mat4_scale(sphere_obj.model_matrix, vec3_create(1.5f, 1.5f, 1.5f)); // Kugel verkleinern
         sphere_obj.model_matrix = mat4_rotate(sphere_obj.model_matrix, angle, vec3_create(1.0f, 0.0f, 0.0f));
 
+        // Modelltransformation für die blaue Kugel
+        blue_sphere_obj.model_matrix = mat4_identity();
+        // 1. Um die gelbe Kugel rotieren (Y-Achse)
+        blue_sphere_obj.model_matrix = mat4_rotate(blue_sphere_obj.model_matrix, angle * 0.5f, vec3_create(0.0f, 1.0f, 0.0f));
+        // 2. Auf den Orbit-Radius verschieben (entlang der X-Achse nach der Rotation)
+        blue_sphere_obj.model_matrix = mat4_translate(blue_sphere_obj.model_matrix, vec3_create(5.0f, 5.0f, 0.0f));
+        // 3. Die blaue Kugel skalieren (kleiner machen)
+        blue_sphere_obj.model_matrix = mat4_scale(blue_sphere_obj.model_matrix, vec3_create(0.5f, 0.5f, 0.5f));
+        // 4. Eigene Rotation der blauen Kugel (optional)
+        blue_sphere_obj.model_matrix = mat4_rotate(blue_sphere_obj.model_matrix, angle * 2.0f, vec3_create(0.0f, 0.0f, 1.0f));
+
         mat4 view_matrix = mat4_lookAt(camera_pos,
                                        vec3_add(camera_pos, camera_front),
                                        camera_up);
@@ -201,7 +245,8 @@ int main()
 
         object_draw(&triangle_obj, &basicColorShader, &view_matrix, &projection_matrix);
 
-        object_draw(&sphere_obj, &basicColorShader, &view_matrix, &projection_matrix); // Kugel zeichnen
+        object_draw(&sphere_obj, &basicColorShader, &view_matrix, &projection_matrix);      // Kugel zeichnen
+        object_draw(&blue_sphere_obj, &basicColorShader, &view_matrix, &projection_matrix); // Blaue Kugel zeichnen
 
         glfwSwapBuffers(window); // Front- und Backbuffer tauschen, um Frame anzuzeigen
         glfwPollEvents();        // Ereignisse verarbeiten (Tastatur, Maus, Fenstergröße)
@@ -214,9 +259,11 @@ int main()
     // object_destroy() für jedes erstellte RenderObject aufrufen
     object_destroy(&triangle_obj);
     object_destroy(&sphere_obj);
+    object_destroy(&blue_sphere_obj);
 
     // WICHTIG: Speicher der dynamisch allozierten Kugeldaten freigeben
     free_sphere_data(sphere_data_ptr);
+    free_sphere_data(blue_sphere_data_ptr);
 
     // ... (Shader und GLFW freigeben - KEINE ÄNDERUNGEN) ...
     shader_destroy(&basicColorShader);

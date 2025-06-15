@@ -19,7 +19,7 @@ int triangle_vertex_size = 9; // 3 Position, 3 Farbe, 3 Normal
 // rings: Anzahl der vertikalen "Ringe"
 // out_num_floats: Zeiger zur Rückgabe der Gesamtzahl der erzeugten float-Werte
 // out_vertex_size: Zeiger zur Rückgabe der Anzahl der float-Werte pro Vertex (3 pos + 3 Farbe = 6)
-float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out_vertex_size)
+float *create_sphere_data(float r, float g, float b, int segments, int rings, int *out_num_floats, int *out_vertex_size)
 {
     // Jeder Vertex hat 9 floats (posX, posY, posZ, colorR, colorG, colorB, normX, normY, normZ)
     *out_vertex_size = 9;
@@ -47,9 +47,9 @@ float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out
     int current_float_index = 0;
 
     // Farbe für die Kugel (z.B. Gelb)
-    float r_color = 1.0f;
-    float g_color = 1.0f;
-    float b_color = 0.0f;
+    float r_color = r;
+    float g_color = g;
+    float b_color = b;
 
     // Erstelle die Pole
     for (int i = 0; i < segments; ++i)

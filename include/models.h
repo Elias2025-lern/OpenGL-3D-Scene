@@ -8,7 +8,7 @@ extern int triangle_vertex_size;         // Anzahl der Floats pro Vertex des Dre
 
 // Funktionsdeklaration zum Erzeugen der Vertexdaten für eine Kugel
 // Gibt einen Zeiger auf ein Float-Array zurück und aktualisiert die Anzahl der Floats sowie die Vertexgröße
-float *create_sphere_data(int segments, int rings, int *out_num_floats, int *out_vertex_size);
+float *create_sphere_data(float r, float g, float b, int segments, int rings, int *out_num_floats, int *out_vertex_size);
 // Funktion zum Freigeben des dynamisch allokierten Speichers für die Kugeldaten
 void free_sphere_data(float *sphere_data);
 
