@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D-Grafikentwicklung: Todoliste (Ohne externe Bibliotheken)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #0056b3;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background: #e9e9e9;
+            margin-bottom: 8px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        ul li:last-child {
+            margin-bottom: 0;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+            min-width: 20px;
+            min-height: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            color: #0056b3;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .note {
+            background-color: #ffeeba;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3D-Grafikentwicklung: Todoliste</h1>
+        <p class="note">
+            **Hinweis:** Diese Todoliste geht davon aus, dass Sie **keine externen Bibliotheken** für mathematische Operationen oder Bildverarbeitung verwenden dürfen. Alle entsprechenden Funktionen müssen selbst implementiert werden.
+        </p>
+
+        <h2>Teil 1: Obligatorische Prioritäten (Muss der Reihe nach erledigt werden)</h2>
+
+        <h3>1. Grundlagen der Transformationen (Matrizen & Vektoren) - Selbstimplementierung</h3>
+        <ul>
+            <li><input type="checkbox"> **Vektor- und Matrizenklassen/-strukturen implementieren:** Eigene Strukturen/Klassen für Vektoren (z.B. vec3, vec4) und Matrizen (z.B. mat4) erstellen.</li>
+            <li><input type="checkbox"> **Implementierung von Vektoroperationen:** Eigene Funktionen für Vektoroperationen (Addition, Subtraktion, Skalarprodukt, Kreuzprodukt, Normalisierung, Länge) schreiben.</li>
+            <li><input type="checkbox"> **Implementierung von Matrizenoperationen:** Eigene Funktionen für Matrizenoperationen (Matrizenmultiplikation, Einheitsmatrix, Inverse Matrix – insbesondere für Blick- und Normalenmatrix) schreiben.</li>
+            <li><input type="checkbox"> **Implementierung von Transformationsfunktionen:** Eigene Funktionen zum Erstellen von Verschiebungs- (`translate`), Dreh- (`rotate`) und Skalierungs- (`scale`) Matrizen schreiben.</li>
+            <li><input type="checkbox"> **Implementierung von Kamerafunktionen:** Eigene Funktion zum Erstellen der Blickmatrix (`lookAt`) schreiben.</li>
+            <li><input type="checkbox"> **Implementierung von Projektionsfunktionen:** Eigene Funktion zum Erstellen der Perspektivprojektionsmatrix (`perspective`) schreiben.</li>
+            <li><input type="checkbox"> **Matrizen an den Shader übergeben:** Lernen, wie Uniform-Positionen im Shader abgerufen und Matrizen von der CPU an die GPU übergeben werden.</li>
+            <li><input type="checkbox"> **Anwenden der Modellmatrix:** Den Vertex-Shader anpassen, um die Scheitelpunktpositionen mit der selbstimplementierten Modellmatrix zu multiplizieren.</li>
+            <li><input type="checkbox"> **Anwenden der Blickmatrix (View Matrix):** Den Vertex-Shader anpassen, um das Ergebnis der Modellmatrix mit der selbstimplementierten Blickmatrix zu multiplizieren.</li>
+            <li><input type="checkbox"> **Anwenden der Perspektivprojektionsmatrix:** Den Vertex-Shader anpassen, um das Ergebnis der Blickmatrix mit der selbstimplementierten Projektionsmatrix zu multiplizieren.</li>
+        </ul>
+
+        <h3>2. Grundlagen für Mehrere Objekte</h3>
+        <ul>
+            <li><input type="checkbox"> **Darstellung mehrerer Objekte:** Erweitern Sie Ihre Render-Pipeline, um mehrere Objekte zu handhaben, indem Sie für jedes Objekt eigene VAOs/VBOs und Modellmatrizen verwenden.</li>
+        </ul>
+
+        <hr>
+
+        <h2>Teil 2: Parallel ausführbare Aufgaben (Nach den Grundlagen der Matrizen und Basisobjektverwaltung)</h2>
+        <p>
+            Sobald Sie die obligatorischen Prioritäten abgeschlossen haben, können Sie diese Aufgaben parallel oder in der von Ihnen bevorzugten Reihenfolge bearbeiten.
+        </p>
+
+        <h3>Benutzerinteraktion</h3>
+        <ul>
+            <li><input type="checkbox"> **Kamerasteuerung:** Logik in `processInput` hinzufügen, um die Kamera durch Benutzerinteraktion (z.B. Tastatur-W, A, S, D und Mausbewegungen für die Blickrichtung) zu bewegen und zu drehen, unter Verwendung der selbstimplementierten Mathematikfunktionen.</li>
+            <li><input type="checkbox"> **Objektsteuerung:** Dem Benutzer ermöglichen, Objekte in der Szene über Tastatur oder Maus zu steuern (verschieben, drehen, skalieren).</li>
+        </ul>
+
+        <h3>Animation</h3>
+        <ul>
+            <li><input type="checkbox"> **Objektanimation:** Die Modellmatrix eines Objekts im Laufe der Zeit ändern (z.B. einen Würfel kontinuierlich drehen) mittels der selbstimplementierten Mathematikfunktionen.</li>
+            <li><input type="checkbox"> **Kameraanimation:** Die Kamera entlang eines Pfades bewegen oder automatisch drehen lassen.</li>
+        </ul>
+
+        <h3>Geometriedaten-Import (Manuelle Parser-Implementierung)</h3>
+        <ul>
+            <li><input type="checkbox"> **Parser für 3D-Dateien implementieren:** Eigene Code zum Lesen und Parsen von einfachen 3D-Dateiformaten (z.B. `.obj`) schreiben. Dies umfasst das Lesen von Scheitelpunkten, Normalen, Texturkoordinaten und Indizes.</li>
+            <li><input type="checkbox"> **Modellintegration:** Sicherstellen, dass die geparsten Daten korrekt in VAOs/VBOs geladen werden.</li>
+        </ul>
+
+        <h3>Beleuchtung</h3>
+        <ul>
+            <li><input type="checkbox"> **Materialeigenschaften hinzufügen:** Materialeigenschaften wie diffuse Farbe, spiegelnde Farbe und Glanz für Objekte definieren (ggf. als C-Strukturen).</li>
+            <li><input type="checkbox"> **Lichtquellen definieren:** Position und Eigenschaften von Lichtquellen (Farbe, Intensität, Typ) festlegen.</li>
+            <li><input type="checkbox"> **Normalenmatrix implementieren und anwenden:** Eigene Funktion zum Erstellen der Normalenmatrix (oft die transponierte Inverse der Modellmatrix) schreiben und an den Shader übergeben.</li>
+            <li><input type="checkbox"> **Fragment-Shader aktualisieren:** Code im Fragment-Shader schreiben, um den Einfluss des Lichts auf die Oberfläche zu berechnen, basierend auf Scheitelpunktnormalen, Lichtquellenposition und Materialeigenschaften.</li>
+        </ul>
+
+        <h3>Texturierung (Manuelle Bildverarbeitung)</h3>
+        <ul>
+            <li><input type="checkbox"> **Bildlader implementieren:** Eigene Code zum Lesen einfacher Bilddateiformate (z.B. `.bmp`, `.tga` oder `.ppm`) und Extrahieren der Pixeldaten schreiben.</li>
+            <li><input type="checkbox"> **OpenGL-Texturen erstellen:** Die gelesenen Pixeldaten in OpenGL-Texturen umwandeln (`glTexImage2D`).</li>
+            <li><input type="checkbox"> **Texturkoordinaten:** Sicherstellen, dass Ihr Modell Texturkoordinaten für jeden Scheitelpunkt hat (oder diese bei Bedarf generieren).</li>
+            <li><input type="checkbox"> **Vertex-Shader ändern:** Die Texturkoordinaten an den Fragment-Shader übergeben.</li>
+            <li><input type="checkbox"> **Fragment-Shader ändern:** Farben aus der Textur an den gegebenen Texturkoordinaten sampeln.</li>
+        </ul>
+    </div>
+</body>
+</html>
