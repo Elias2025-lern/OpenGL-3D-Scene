@@ -23,16 +23,6 @@
 // Hintergrund-OpenGL-Objekte
 GLuint bgVAO, bgVBO, bgTexture;
 
-
-// Struktur für Felsbrocken-Informationen
-typedef struct {
-    float angle_offset;   // Startwinkel
-    float orbit_radius;   // Umlaufradius
-    float scale;         // Skalierung
-    float orbit_speed;   // Umlaufgeschwindigkeit
-} RockInfo;
-
-
 // Fenstergrößenänderungs-Callback
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height); // Viewport anpassen
@@ -121,6 +111,7 @@ int main() {
     glBindVertexArray(bgVAO);
     glBindBuffer(GL_ARRAY_BUFFER, bgVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(bgVertices), bgVertices, GL_STATIC_DRAW);
+    
     // Vertex-Attribute setzen
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);

@@ -3,6 +3,7 @@
 #include "object.h"
 #include <stdio.h> // Für fprintf
 
+
 RenderObject object_create(const float* vertices, int num_floats, int vertex_size)
 {
     RenderObject new_obj;

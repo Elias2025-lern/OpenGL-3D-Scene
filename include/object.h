@@ -14,6 +14,14 @@ typedef struct {
     mat4 model_matrix;
 } RenderObject;
 
+// Struktur für Felsbrocken-Informationen
+typedef struct {
+    float angle_offset;   // Startwinkel
+    float orbit_radius;   // Umlaufradius
+    float scale;         // Skalierung
+    float orbit_speed;   // Umlaufgeschwindigkeit
+} RockInfo;
+
 // Erstellt ein Objekt mit den angegebenen Vertexdaten
 RenderObject object_create(const float* vertices, int num_floats, int vertex_size);
 
