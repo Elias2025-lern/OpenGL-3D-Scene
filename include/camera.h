@@ -1,13 +1,26 @@
+
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <math.h>
-#include <GL/glew.h>
+#include <stdbool.h>
 #include <GLFW/glfw3.h>
 
-// View-Matrix erstellen und in das Array *out* schreiben
-void lookAt(GLfloat *out, const GLfloat *eye, const GLfloat *center, const GLfloat *up);
-// Projektionsmatrix erstellen und in das Array *out* schreiben
-void perspective(GLfloat *out, GLfloat fovy, GLfloat aspect, GLfloat near, GLfloat far);
+// Kamera-Parameter (extern, damit main.c sie lesen kann)
+extern float yaw;            // Yaw-Winkel (links/rechts)
+extern float pitch;          // Pitch-Winkel (oben/unten)
+extern float radius;         // Abstand zur Szene
+extern float lastX;          // Letzte Maus-X-Position
+extern float lastY;          // Letzte Maus-Y-Position
+extern bool rotating;        // Wird die Kamera gerade gedreht?
+extern bool firstMouse;      // Erste Bewegung nach Mausklick ignorieren
+
+// Initialisiert die Callback-Funktionen f�r Maus und Scrollrad
+void camera_setup_callbacks(GLFWwindow* window);
+
+// Setzt die Kamera zur�ck auf die Standardansicht
+void camera_reset();
+
+// Berechnet die aktuelle Kameraposition (f�r View-Matrix)
+void camera_get_position(float* outVec3);
 
 #endif

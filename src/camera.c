@@ -1,58 +1,66 @@
+// camera.c – Steuerung der Benutzerkamera (Maus, Scrollrad, Reset)
 #include "camera.h"
+#include <GLFW/glfw3.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
+// Globale Kameraparameterloat yaw = 0.0f, pitch = 0.0f, radius = 50.0f;
+float lastX = 400, lastY = 300;
+bool rotating = false, firstMouse = true;
 
-void lookAt(GLfloat *out, const GLfloat *eye, const GLfloat *center, const GLfloat *up) {
-    // Forward-Vektor berechnen und normalisieren
-    GLfloat fx = center[0] - eye[0];
-    GLfloat fy = center[1] - eye[1];
-    GLfloat fz = center[2] - eye[2];
-    GLfloat f_len = sqrt(fx*fx + fy*fy + fz*fz);
-    fx /= f_len;
-    fy /= f_len;
-    fz /= f_len;
-
-    // Seiten-Vektor berechnen (x-Achse) = f × up
-    GLfloat sx = fy * up[2] - fz * up[1];
-    GLfloat sy = fz * up[0] - fx * up[2];
-    GLfloat sz = fx * up[1] - fy * up[0];
-    GLfloat s_len = sqrt(sx*sx + sy*sy + sz*sz);
-    sx /= s_len;
-    sy /= s_len;
-    sz /= s_len;
-    // korrigierter Up-Vektor (y-Achse) = s × f
-    GLfloat ux = sy * fz - sz * fy;
-    GLfloat uy = sz * fx - sx * fz;
-    GLfloat uz = sx * fy - sy * fx;
-
-    // View-Matrix in Column-Major-Format
-    out[0] = sx;
-    out[1] = ux;
-    out[2] = -fx;
-    out[3] = 0.0f;
-    out[4] = sy;
-    out[5] = uy;
-    out[6] = -fy;
-    out[7] = 0.0f;
-
-    out[8]  = sz;
-    out[9]  = uz;
-    out[10] = -fz;
-    out[11] = 0.0f;
-
-    out[12] = - (sx * eye[0] + sy * eye[1] + sz * eye[2]);
-    out[13] = - (ux * eye[0] + uy * eye[1] + uz * eye[2]);
-    out[14] =    (fx * eye[0] + fy * eye[1] + fz * eye[2]);
-    out[15] = 1.0f;
+// Grad zu Radiant-Konvertierung (für Kamerawinkel)
+static float glm_rad(float deg) {
+    return deg * (float)M_PI / 180.0f;
 }
 
-void perspective(GLfloat *out, GLfloat fovy, GLfloat aspect, GLfloat near, GLfloat far) {
-    GLfloat tanHalfFovy = tanf(fovy / 2.0f);
-    for (int i = 0; i < 16; i ++) {
-        out[i] = 0.0f;
-    }
-    out[0]  = 1.0f / (aspect * tanHalfFovy);                         
-    out[5]  = 1.0f / tanHalfFovy;                               
-    out[10] = -(far + near) / (far - near);  
-    out[11] = -2.0f * far * near / (far - near);                        
-    out[14] = -1.0f;                                               
+// Maustaste gedrückt oder losgelassen
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+        rotating = (action == GLFW_PRESS);
+}
+
+// Maus bewegt sich
+static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (!rotating) { firstMouse = true; return; }
+    if (firstMouse) { lastX = xpos; lastY = ypos; firstMouse = false; }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // Y ist invertiert
+    lastX = xpos;
+    lastY = ypos;
+    float sensitivity = 0.2f;
+    yaw += xoffset * sensitivity;
+    pitch += yoffset * sensitivity;
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
+}
+
+// Mausrad bewegt sich (Zoom)
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    radius -= yoffset;
+    if (radius < 5.0f) radius = 5.0f;
+    if (radius > 150.0f) radius = 150.0f;
+}
+
+// Setzt die Kamera zurück auf Ausgangswert
+void camera_reset() {
+    yaw = 0.0f;
+    pitch = 0.0f;
+    radius = 50.0f;
+}
+
+// Initialisiert alle Callback-Funktionen
+void camera_setup_callbacks(GLFWwindow* window) {
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+}
+
+// Berechnet Kameraposition für LookAt
+void camera_get_position(float* outVec3) {
+    float camX = radius * cosf(glm_rad(yaw)) * cosf(glm_rad(pitch));
+    float camY = radius * sinf(glm_rad(pitch));
+    float camZ = radius * sinf(glm_rad(yaw)) * cosf(glm_rad(pitch));
+    outVec3[0] = camX;
+    outVec3[1] = camY;
+    outVec3[2] = camZ;
 }

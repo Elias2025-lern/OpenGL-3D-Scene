@@ -1,79 +1,145 @@
-# 🧊 Comgraph3D
 
-**Comgraph3D** ist ein 3D-Grafikprojekt, das grundlegende OpenGL-Techniken demonstriert, entwickelt in der Programmiersprache **C** unter Verwendung moderner OpenGL (Version 3). Es bietet eine einfache Plattform zur Visualisierung und Manipulation von 3D-Objekten.
+# 🧊 Comgraph3D – Interaktives 3D-Sonnensystem
+
+**Comgraph3D** ist ein interaktives 3D-Grafikprojekt zur Darstellung eines Sonnensystems.  
+Es wurde in **C** mit OpenGL 3.3 umgesetzt und zeigt Planetenbewegung, Texturen, Licht und Kamerasteuerung.
+
+---
 
 ## 🔧 Verwendete Technologien
 
-- **C** – Systemnahe Programmiersprache für hohe Leistung
-- **OpenGL 3** – Grafikbibliothek für 3D-Darstellung
-- **GLEW** – OpenGL Extension Wrangler Library zur Verwaltung von Erweiterungen
-- **GLFW** – plattformübergreifendes Fenster- und Eingabe-Handling
+- **C** – Systemnahe Programmiersprache
+- **OpenGL 3.3 Core** – Grafikpipeline
+- **GLEW** – Erweiterungsverwaltung
+- **GLFW** – Fenster- und Eingabesteuerung
+- **stb_image** – Bild- und Texturladung
+- **Eigene Matrixfunktionen** – für Transformationen und Projektionen
 
-## 🚀 Demo
+---
 
-*(Hier können Sie Screenshots oder einen Link zu einer Demo einfügen)*
+## 🌍 Projekt-Features
+
+- 3D-Sonnensystem mit Sonne + 9 Planeten  
+- Echtzeit-Umlaufbahnen und Rotationen  
+- Individuelle Texturen für jeden Planeten  
+- Hintergrundbild (Weltraum)  
+- 30 kleine und 3 große Asteroiden mit zufälligen Umläufen  
+- Kamera-Rotation mit Maus, Zoom mit Mausrad, Reset mit Taste R  
+- Lichtberechnung mit Phong-Shading  
+- OBJ-Dateien für Planetenmodelle und Felsen
+
+---
 
 ## 📁 Projektstruktur
 
 ```bash
 Comgraph3D/
-├── assets/           # Enthält Projekt-Ressourcen
-│       ├── shaders/      # Shader-Quellcode (Vertex, Fragment, Geometrie...) (z.B. .vert, .frag)
-│     	└── textures/     # Bilddateien für Texturen (z.B. .png, .jpg)      
-├── build/            # Verzeichnis für kompilierte Dateien
-├── docs/             # Projektdokumentation (optional)
-├── include/          # Header-Dateien (.h) für die Module deines Projekts
-├── src/              # C-Quellcodedateien (.c)
-│   ├── camera.c      # Code für die Kamerabehandlung
-│   ├── main.c        # Haupteinstiegspunkt der Anwendung und Hauptschleife
-│   ├── mesh.c        # Code zum Laden und Behandeln von Meshes/Modellen
-│   └── shader.c      # Code zum Laden, Kompilieren und Verwalten von Shadern
-├── Makefile          # Konfigurationsdatei für das Make-Build-System
-└── README.md         # Projektbeschreibung
+├── assets/
+│   ├── shaders/
+│   │   ├── basic_color.vert
+│   │   └── basic_color.frag
+│   └── textures/
+│       ├── sun.jpg
+│       ├── earth.jpg
+│       ├── mars.jpg
+│       ├── mercury.jpg
+│       ├── venus.jpg
+│       ├── jupiter.jpg
+│       ├── saturn.jpg
+│       ├── uranus.jpg
+│       ├── neptune.jpg
+│       ├── pluto.jpg
+│       ├── rock.jpg
+│       ├── large_rock.jpg
+│       └── space.jpeg
+├── models/
+│   ├── cube.obj
+│   └── rock.obj
+├── include/
+│   ├── camera.h
+│   ├── camera_matrix.h
+│   ├── light.h
+│   ├── matrix.h
+│   ├── matrix_transformation.h
+│   ├── models.h
+│   ├── object.h
+│   ├── obj_loader.h
+│   ├── shader.h
+│   ├── stb_image.h
+│   └── utils.h
+├── src/
+│   ├── main.c
+│   ├── camera.c
+│   ├── camera_matrix.c
+│   ├── light.c
+│   ├── matrix.c
+│   ├── matrix_transformation.c
+│   ├── models.c
+│   ├── object.c
+│   ├── obj_loader.c
+│   ├── shader.c
+│   └── test-matrix-und-camera.c
+├── build/                   # Optional – für kompilierte Dateien
+├── docs/                    # Optional – Projektdokumentation
+├── obj/                     # Kompilierte Objektdateien (.o)
+├── Makefile
+├── README.md
+├── app.exe
+
 ```
+
+---
+
 ## ⚙️ Installation
-### Voraussetzungen
-	-Linux oder WSL2 unter Windows
-	-Compiler (z. B. GCC)
-	-Make
-	-GLEW und GLFW installiert (z. B. über Paketmanager):
-	
+
+### Voraussetzungen (MSYS2 empfohlen)
+
 ```bash
-# Für Debian/Ubuntu:
-sudo apt install libglew-dev libglfw3-dev libglm-dev meson ninja-build
+pacman -S mingw-w64-x86_64-gcc \
+            mingw-w64-x86_64-glfw \
+            mingw-w64-x86_64-glew \
+            mingw-w64-x86_64-stb \
+            make
 ```
 
-### Build & Ausführen
+---
 
-Befolge diese Schritte, um das Projekt zu klonen, zu bauen und die Anwendung zu starten:
+### 🔧 Build & Start
 
-1.  **Repository klonen:**
-    Klone den Projekt-Code von GitHub auf deinen lokalen Rechner.
-    ```bash
-    git clone https://github.com/quylecse/comgraph3d.git
-    ```
+```bash
+make         # Projekt kompilieren
+./app.exe    # Anwendung starten
+```
 
-2.  **In das Projektverzeichnis wechseln:**
-    Navigiere in den neu erstellten Projektordner.
-    ```bash
-    cd comgraph3d
-    ```
+---
 
-3.  **Projekt bauen:**
-    Verwende den `make`-Befehl, um das Projekt anhand des Makefiles im Wurzelverzeichnis zu kompilieren und zu linken.
-    ```bash
-    make
-    ```
+## 🎮 Steuerung
 
-4.  **Anwendung starten:**
-    Führe die kompilierte Anwendung aus. Der genaue Befehl oder Pfad zur ausführbaren Datei kann je nach Konfiguration deines Makefiles variieren. Passe den Pfad bei Bedarf an den tatsächlichen Speicherort der ausführbaren Datei an (z. B. `./bin/comgraph3d`, falls eine `bin`-Ordner erstellt wird).
-    ```bash
-    ./comgraph3d
-    ```
-    (Alternative: Wenn dein `Makefile` ein `run`-Target definiert, kannst du stattdessen auch einfach `make run` ausführen.)
+| Eingabe         | Funktion                        |
+|----------------|----------------------------------|
+| Linksklick + Maus | Kamera rotieren                 |
+| Mausrad         | Zoom                            |
+| Taste `R`       | Kamera zurücksetzen             |
 
-## 👤 Autor
+---
 
-- **Phu Quy Le**, Matrikelnummer: 1764640
-- **Mohammed Al-Muliki**, Martikelnummer: 1696172
-- **Truong Minh Khoi Nguyen**, Matrikelnummer: 1764501
+## ✅ Erfüllte Anforderungen
+
+Alle Anforderungen aus dem Aufgabenblatt wurden umgesetzt:
+
+1. **README-Datei** mit Anleitung und Beschreibung  
+2. **Eigene Matrixfunktionen** für Transformationen  
+3. **Import von .obj-Dateien**  
+4. **Mehrere 3D-Objekte** (Sonne, Planeten, Felsen)  
+5. **Animationen** von Kamera und Objekten  
+6. **Phong-Lichtberechnung**  
+7. **Texturierung** aller Planeten und Felsen  
+8. **Benutzerinteraktion** (Maus & Tastatur)
+
+---
+
+## 👤 Autor:innen
+
+- **Mohammed Al-Muliki**, Matrikelnummer: 1696172  
+- **Phu Quy Le**, Matrikelnummer: 1764640  
+- **Truong Minh Khoi Nguyen**, Matrikelnummer: 1764501  

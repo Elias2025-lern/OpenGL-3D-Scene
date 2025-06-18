@@ -15,7 +15,7 @@ typedef struct
 Shader shader_create(const char *vertexPath, const char *fragmentPath);
 
 // Funktion zum Aktivieren (Benutzen) des Shader-Programms
-void shader_use(const Shader *shader);
+void shader_use(const Shader* shader);
 
 // Funktion zum Setzen einer float-Uniform-Variable im Shader
 void shader_set_float(Shader *shader, const char *name, float value);

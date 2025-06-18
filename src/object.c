@@ -3,7 +3,7 @@
 #include "object.h"
 #include <stdio.h> // Für fprintf
 
-RenderObject object_create(const float *vertices, int num_floats, int vertex_size)
+RenderObject object_create(const float* vertices, int num_floats, int vertex_size)
 {
     RenderObject new_obj;
     // Berechne die Anzahl der Vertices basierend auf der Gesamtzahl der Floats und der Floats pro Vertex
@@ -28,26 +28,19 @@ RenderObject object_create(const float *vertices, int num_floats, int vertex_siz
     glBindBuffer(GL_ARRAY_BUFFER, new_obj.VBO);
     glBufferData(GL_ARRAY_BUFFER, num_floats * sizeof(float), vertices, GL_STATIC_DRAW);
 
-    // Konfiguration der Vertex-Attribute
-    // vertex_size jetzt typischerweise 9 (3 Position + 3 Farbe + 3 Normal)
-    size_t stride = vertex_size * sizeof(float);
-
     // layout (location = 0) im Shader ist für Position (aPos)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // layout (location = 1) im Shader ist für Farbe (aColor)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)(3 * sizeof(float)));
+    // layout (location = 1) im Shader ist jetzt für Textur-Koordinaten (aTexCoord)
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    // layout (location = 2) im Shader ist für Normale (aNormal)
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0); // VAO lösen (unbind)
     return new_obj;
 }
 
-void object_draw(RenderObject *obj, const Shader *shader_program, const mat4 *view, const mat4 *projection)
+void object_draw(RenderObject* obj, const Shader* shader_program, const mat4* view, const mat4* projection)
 {
     // Nur zeichnen, wenn VAO gültig ist
     if (obj->VAO == 0)
@@ -58,20 +51,20 @@ void object_draw(RenderObject *obj, const Shader *shader_program, const mat4 *vi
 
     // Sende die Uniform-Matrizen
     GLint modelLoc = glGetUniformLocation(shader_program->id, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (const GLfloat *)obj->model_matrix.m);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (const GLfloat*)obj->model_matrix.m);
 
     GLint viewLoc = glGetUniformLocation(shader_program->id, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (const GLfloat *)view->m);
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (const GLfloat*)view->m);
 
     GLint projLoc = glGetUniformLocation(shader_program->id, "projection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, (const GLfloat *)projection->m);
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, (const GLfloat*)projection->m);
 
     glBindVertexArray(obj->VAO);
     glDrawArrays(GL_TRIANGLES, 0, obj->vertex_count); // Zeichne das Objekt
     glBindVertexArray(0);
 }
 
-void object_destroy(RenderObject *obj)
+void object_destroy(RenderObject* obj)
 {
     if (obj->VAO != 0)
     { // Nur löschen, wenn VAO gültig ist

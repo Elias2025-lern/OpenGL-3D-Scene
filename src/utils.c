@@ -2,7 +2,7 @@
 #include <stdlib.h> // Für malloc, free, exit
 
 // Verarbeitet Benutzereingaben (z.B. ESC-Taste zum Schließen des Fensters)
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
@@ -12,11 +12,11 @@ void processInput(GLFWwindow *window)
 
 // Liest den gesamten Inhalt einer Datei und gibt ihn als String zurück.
 // Der Aufrufer ist verantwortlich, den Speicher nach der Verwendung mit free() freizugeben.
-char *read_file(const char *filepath)
+char* read_file(const char* filepath)
 {
     assert(filepath != NULL && "Dateipfad darf nicht NULL sein");
 
-    FILE *file = fopen(filepath, "rb"); // Öffne Datei im binären Lesemodus
+    FILE* file = fopen(filepath, "rb"); // Öffne Datei im binären Lesemodus
     if (!file)
     {
         fprintf(stderr, "Konnte Datei nicht öffnen: %s\n", filepath);
@@ -27,7 +27,7 @@ char *read_file(const char *filepath)
     long length = ftell(file); // Ermittle aktuelle Position (Dateigröße)
     fseek(file, 0, SEEK_SET);  // Verschiebe Zeiger zurück zum Anfang der Datei
 
-    char *buffer = (char *)malloc(length + 1); // Speicher reservieren
+    char* buffer = (char*)malloc(length + 1); // Speicher reservieren
     if (!buffer)
     {
         fprintf(stderr, "Speicherreservierung für Datei fehlgeschlagen: %s\n", filepath);

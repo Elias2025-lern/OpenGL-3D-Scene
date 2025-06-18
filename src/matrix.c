@@ -97,7 +97,8 @@ mat4 mat4_multiply(mat4 a, mat4 b)
         { // Zeilen der Ergebnis-Matrix
             result.m[i][j] = 0.0f;
             for (int k = 0; k < 4; ++k)
-            { // Achtung: a.m[i][k] und b.m[k][j], da spaltenmajor gespeichert
+            {
+                // Achtung: a.m[i][k] und b.m[k][j], da spaltenmajor gespeichert
                 result.m[i][j] += a.m[i][k] * b.m[k][j];
             }
         }

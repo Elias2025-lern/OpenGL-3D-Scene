@@ -1,34 +1,55 @@
 #version 330 core
+
+// Ausgabe: Endgültige Farbe
 out vec4 FragColor;
 
-in vec3 FragPos_world;
-in vec3 Normal_world;
-in vec3 VertexColor; // Eingabefarbe, vom Vertex-Shader interpoliert
+// Eingaben vom Vertex-Shader
+in vec2 TexCoord;    // Texturkoordinaten
+in vec3 FragPos;     // Fragmentposition im Weltraum
+in vec3 Normal;      // Normalenvektor
 
-uniform vec3 lightPos_world; // Position der Lichtquelle in Weltkoordinaten
-uniform vec3 viewPos_world;  // Position des Betrachters/der Kamera in Weltkoordinaten
-uniform vec3 lightColor;     // Farbe der Lichtquelle
-// uniform vec3 objectColor; // Alternative: Objektfarbe als Uniform
+// Uniform-Variablen vom Hauptprogramm
+uniform sampler2D texture1;  // Textur-Sampler
+uniform vec3 lightPos;       // Lichtposition im Weltraum
+uniform vec3 viewPos;        // Kameraposition
+uniform vec3 lightColor;     // Lichtfarbe
+uniform bool isBackground;   // Flag für Hintergrundobjekte
 
-void main() {
-    // Umgebungslicht (Ambient)
-    float ambientStrength = 0.1; // Stärke des Umgebungslichts
+void main()
+{
+    // Falls es ein Hintergrundobjekt ist, nur Textur ohne Beleuchtung anzeigen
+    if (isBackground) {
+        vec3 bg = texture(texture1, TexCoord).rgb * 0.3; // Hintergrund abdunkeln
+        FragColor = vec4(bg, 1.0);
+        return;
+    }
+
+    // Beleuchtungsberechnungen
+    vec3 norm = normalize(Normal);               // Normalenvektor normalisieren
+    vec3 lightDir = normalize(lightPos - FragPos); // Lichtrichtungsvektor
+
+    // Ambientale Beleuchtung (Grundlicht)
+    float ambientStrength = 0.5;
     vec3 ambient = ambientStrength * lightColor;
 
-    // Diffuses Licht
-    vec3 norm = normalize(Normal_world);
-    vec3 lightDir = normalize(lightPos_world - FragPos_world);
-    float diff = max(dot(norm, lightDir), 0.0); // Intensität des diffusen Lichts
+    // Diffuse Beleuchtung (Streulicht)
+    float diff = max(dot(norm, lightDir), 0.0);  // Lambertsches Kosinusgesetz
     vec3 diffuse = diff * lightColor;
 
-    // Spiegelndes Licht (Specular)
-    float specularStrength = 0.5; // Stärke des spiegelnden Lichts
-    vec3 viewDir = normalize(viewPos_world - FragPos_world);
-    vec3 reflectDir = reflect(-lightDir, norm); // Reflektierter Lichtvektor
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // 32 ist der Glanzfaktor (shininess)
+    // Spiegelnede Beleuchtung (Glanzlichter)
+    float specularStrength = 7.0;
+    vec3 viewDir = normalize(viewPos - FragPos); // Blickrichtung
+    vec3 reflectDir = reflect(-lightDir, norm);  // Reflektionsvektor
+    // Phong-Beleuchtungsmodell (32 ist der Glanzwert)
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;
 
-    // Kombiniere die Komponenten mit der Objektfarbe (hier VertexColor)
-    vec3 result = (ambient + diffuse + specular) * VertexColor;
-    FragColor = vec4(result, 1.0f);
+    // Alle Lichtkomponenten kombinieren
+    vec3 lighting = ambient + diffuse + specular;
+
+    // Farbe aus der Textur holen
+    vec3 texColor = texture(texture1, TexCoord).rgb;
+
+    // Endgültige Farbe mit Beleuchtung
+    FragColor = vec4(lighting * texColor, 1.0);
 }

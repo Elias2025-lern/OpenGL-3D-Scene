@@ -21,7 +21,8 @@ TARGET = app.exe
 # C-Quellcodedateien des Projekts
 SRC_DIR = src
 # WICHTIG: Sicherstellen, dass alle .c-Dateien hier aufgeführt sind!
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c $(SRC_DIR)/matrix.c $(SRC_DIR)/models.c $(SRC_DIR)/object.c
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/utils.c $(SRC_DIR)/shader.c $(SRC_DIR)/matrix.c $(SRC_DIR)/models.c $(SRC_DIR)/object.c $(SRC_DIR)/obj_loader.c $(SRC_DIR)/light.c
+
 
 # Ordner für Objektdateien (.o)
 OBJ_DIR = obj
