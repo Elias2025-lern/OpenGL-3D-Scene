@@ -143,3 +143,4 @@ Alle Anforderungen aus dem Aufgabenblatt wurden umgesetzt:
 - **Mohammed Al-Muliki**, Matrikelnummer: 1696172  
 - **Phu Quy Le**, Matrikelnummer: 1764640  
 - **Truong Minh Khoi Nguyen**, Matrikelnummer: 1764501  
+- **Elias Al-Maqtry**, Matrikelnummer: 1630686
