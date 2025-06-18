@@ -14,31 +14,15 @@
 #include "object.h"           // 3D-Objekte
 #include "obj_loader.h"       // OBJ-Dateien laden
 #include "light.h"            // Lichtberechnungen
+#include "camera.h"           // Kamera-Handlung
 
 #define ROCK_TOTAL 30         // Anzahl der kleinen Felsbrocken
 #define LARGE_ROCKS 3         // Anzahl der großen Felsbrocken
 
-// Initiale Kameraparameter
-const float INIT_YAW = 30.0f;    // Horizontale Ausrichtung
-const float INIT_PITCH = 15.0f;  // Vertikale Ausrichtung
-const float INIT_RADIUS = 75.0f; // Abstand vom Zentrum
-
-// Globale Kameravariablen
-float yaw = INIT_YAW;
-float pitch = INIT_PITCH;
-float radius = INIT_RADIUS;
-
-// Maussteuerungsvariablen
-float lastX = 400, lastY = 300;
-bool firstMouse = true, rotating = false;
 
 // Hintergrund-OpenGL-Objekte
 GLuint bgVAO, bgVBO, bgTexture;
 
-// Grad zu Bogenmaß Konvertierung
-float glm_rad(float deg) {
-    return deg * (float)M_PI / 180.0f;
-}
 
 // Struktur für Felsbrocken-Informationen
 typedef struct {
@@ -48,38 +32,6 @@ typedef struct {
     float orbit_speed;   // Umlaufgeschwindigkeit
 } RockInfo;
 
-// Mausklick-Callback
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT)
-        rotating = (action == GLFW_PRESS); // Rotation aktivieren bei Linksklick
-}
-
-// Mausbewegungs-Callback
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    if (!rotating) { firstMouse = true; return; } // Nur bei aktivierter Rotation
-    if (firstMouse) { lastX = xpos; lastY = ypos; firstMouse = false; }
-
-    // Differenz zur letzten Position berechnen
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-    lastX = xpos; lastY = ypos;
-
-    // Kamerawinkel aktualisieren
-    float sensitivity = 0.2f;
-    yaw += xoffset * sensitivity;
-    pitch += yoffset * sensitivity;
-
-    // Vertikale Grenzen setzen
-    if (pitch > 89.0f) pitch = 89.0f;
-    if (pitch < -89.0f) pitch = -89.0f;
-}
-
-// Mausrad-Callback für Zoom
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    radius -= yoffset; // Kameradistanz ändern
-    if (radius < 5.0f) radius = 5.0f;   // Minimale Distanz
-    if (radius > 100.0f) radius = 100.0f; // Maximale Distanz
-}
 
 // Fenstergrößenänderungs-Callback
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -144,9 +96,7 @@ int main() {
 
     // Callbacks registrieren
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    camera_setup_callbacks(window);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     if (glewInit() != GLEW_OK) return -1; // GLEW initialisieren
@@ -248,18 +198,22 @@ int main() {
     // Hauptrenderloop
     while (!glfwWindowShouldClose(window)) {
         float time = (float)glfwGetTime(); // Zeit seit Start
+        float deltaTime, lastFrame = 0.0f;
+        deltaTime = time - lastFrame;
+        lastFrame = time;
 
         // Kamera zurücksetzen bei R-Taste
         if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-            yaw = INIT_YAW; pitch = INIT_PITCH; radius = INIT_RADIUS;
+            camera_reset();
         }
+        //Kamera bewegen mit W, A, S, D Tasten
+        camera_process_keyboard(window, deltaTime);
 
         // Kameraposition berechnen (Kugelkoordinaten)
-        float camX = radius * cosf(glm_rad(yaw)) * cosf(glm_rad(pitch));
-        float camY = radius * sinf(glm_rad(pitch));
-        float camZ = radius * sinf(glm_rad(yaw)) * cosf(glm_rad(pitch));
-        vec3 camPos = vec3_create(camX, camY, camZ);
-
+        float camPosArr[3];
+        camera_get_position(camPosArr);
+        vec3 camPos = vec3_create(camPosArr[0], camPosArr[1], camPosArr[2]);
+        
         // View- und Projektionsmatrizen erstellen
         mat4 view = mat4_lookAt(camPos, vec3_create(0, 0, 0), vec3_create(0, 1, 0));
         mat4 proj = mat4_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 200.0f);
