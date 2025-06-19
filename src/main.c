@@ -180,7 +180,7 @@ int main() {
 
     // Lichtquelle konfigurieren
     Light light = {
-        .position = vec3_create(10.f, 10.0f, 10.0f),
+        .position = vec3_create(0.f, 0.0f, 0.0f),
         .color = vec3_create(1.5f, 1.5f, 1.5f),
         .ambient_strength = 0.2f,
         .specular_strength = 2.0f

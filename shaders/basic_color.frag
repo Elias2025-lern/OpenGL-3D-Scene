@@ -19,7 +19,7 @@ void main()
 {
     // Falls es ein Hintergrundobjekt ist, nur Textur ohne Beleuchtung anzeigen
     if (isBackground) {
-        vec3 bg = texture(texture1, TexCoord).rgb * 0.3; // Hintergrund abdunkeln
+        vec3 bg = texture(texture1, TexCoord).rgb * 0.4; // Hintergrund abdunkeln
         FragColor = vec4(bg, 1.0);
         return;
     }
