@@ -144,3 +144,9 @@ Alle Anforderungen aus dem Aufgabenblatt wurden umgesetzt:
 - **Phu Quy Le**, Matrikelnummer: 1764640  
 - **Truong Minh Khoi Nguyen**, Matrikelnummer: 1764501  
 - **Elias Al-Maqtry**, Matrikelnummer: 1630686
+
+
+## Quellen
+- [Texutren](https://www.solarsystemscope.com/textures/)
+- [Rock](https://sketchfab.com/tags/rock)
+
