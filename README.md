@@ -117,7 +117,7 @@ make         # Projekt kompilieren
 
 | Eingabe         | Funktion                        |
 |----------------|----------------------------------|
-| Linksklick + Maus | Kamera rotieren                 |
+| Linksklick + Maus + Taste `W A S D` | Kamera rotieren                 |
 | Mausrad         | Zoom                            |
 | Taste `R`       | Kamera zurücksetzen             |
 
