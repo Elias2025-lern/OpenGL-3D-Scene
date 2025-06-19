@@ -24,7 +24,7 @@ Es wurde in **C** mit OpenGL 3.3 umgesetzt und zeigt Planetenbewegung, Texturen,
 - Individuelle Texturen für jeden Planeten  
 - Hintergrundbild (Weltraum)  
 - 30 kleine und 3 große Asteroiden mit zufälligen Umläufen  
-- Kamera-Rotation mit Maus, Zoom mit Mausrad, Reset mit Taste R  
+- Kamera-Rotation mit Maus/Tastatur, Zoom mit Mausrad, Reset mit Taste R  
 - Lichtberechnung mit Phong-Shading  
 - OBJ-Dateien für Planetenmodelle und Felsen
 
